@@ -175,7 +175,7 @@ def test_scatter3d_color():
                color='b', marker='s')
 
 
-@image_comparison(baseline_images=['scatter_face_color_change'],
+@image_comparison(baseline_images=['scatter3d_face_color_change'],
                   remove_text=True, extensions=['png'])
 def test_scatter_face_color_change():
     # Take the test data from above
@@ -187,9 +187,9 @@ def test_scatter_face_color_change():
     scat.set_facecolors("green")
 
 
-@image_comparison(baseline_images=['scatter_edgecolor_nochange'],
+@image_comparison(baseline_images=['scatter3d_edgecolor_unchange'],
                   remove_text=True, extensions=['png'])
-def test_scatter_edgecolor_nochange():
+def test_scatter_edgecolor_unchange():
     # test to ensure edge color is not updated with facecolor if it
     # is set at the beginning
     # Take the test data from above
@@ -198,7 +198,7 @@ def test_scatter_edgecolor_nochange():
     scat = ax.scatter(np.arange(10), np.arange(10), np.arange(10),
                       facecolors="red", edgecolors="blue")
     # changes facecolor, it should not change edgecolor when displayed
-    scat.set_edgecolors("green")
+    scat.set_facecolors("yellow")
 
 
 @image_comparison(baseline_images=['surface3d'], remove_text=True)

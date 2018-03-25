@@ -3182,7 +3182,6 @@ class NavigationToolbar2(object):
     def set_history_buttons(self):
         """Enable or disable the back/forward button."""
 
-
     def data_cursor(self, *args):
         """navigate through the plot data"""
 
@@ -3202,6 +3201,7 @@ class NavigationToolbar2(object):
                     self.selectors.append(DataCursorSelector(line, markers))
                 print(self.selectors)
         else:
+            print("Enter else")
             for selector in self.selectors:
                 selector.remove_events()
             self.selectors = []

@@ -1486,12 +1486,16 @@ class DataCursorSelector(VertexSelector):
         self.cid = self.canvas.mpl_connect('key_press_event', self.onpress)
 
     def remove_events(self):
+        # This may or may not be expected behaviour. This could definitely
+        # cause problems in a plot with lines and markers. May need to
+        # rethink this.
+        self.markers.set_data([], [])
         self.canvas.mpl_disconnect(self.cid)
+        self.canvas.draw_idle()
 
     def process_selected(self, ind, xs, ys):
         print(ind)
-        print(xs)
-        print(ys)
+        print("xs:", xs, "ys:", ys)
         self.markers.set_data(xs, ys)
         self.canvas.draw_idle()
 

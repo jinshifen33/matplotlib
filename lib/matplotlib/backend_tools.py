@@ -762,6 +762,20 @@ class SaveFigureBase(ToolBase):
     default_keymap = rcParams['keymap.save']
 
 
+class DataCursor(ToolToggleBase):
+    """Base tool for data cursor"""
+    description = 'View data'
+    image = 'filesave'
+    default_keymap = rcParams['keymap.save']
+
+    def __init__(self, *args):
+        ToolToggleBase.__init__(self, *args)
+
+    def trigger(self, sender, event, data=None):
+        if event.inaxes is None:
+            return
+        ToolToggleBase.trigger(self, sender, event, data)
+
 class ZoomPanBase(ToolToggleBase):
     """Base class for `ToolZoom` and `ToolPan`"""
     def __init__(self, *args):

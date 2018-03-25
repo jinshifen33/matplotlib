@@ -725,7 +725,7 @@ class NavigationToolbar2QT(NavigationToolbar2, QtWidgets.QToolBar):
                 a = self.addAction(self._icon(image_file + '.png'),
                                    text, getattr(self, callback))
                 self._actions[callback] = a
-                if callback in ['zoom', 'pan']:
+                if callback in ['zoom', 'pan', 'data_cursor']:
                     a.setCheckable(True)
                 if tooltip_text is not None:
                     a.setToolTip(tooltip_text)
@@ -796,15 +796,22 @@ class NavigationToolbar2QT(NavigationToolbar2, QtWidgets.QToolBar):
 
     def _update_buttons_checked(self):
         # sync button checkstates to match active mode
+        print("backend")
+        print(self._active)
         self._actions['pan'].setChecked(self._active == 'PAN')
         self._actions['zoom'].setChecked(self._active == 'ZOOM')
+        self._actions['data_cursor'].setChecked(self._active == 'DATA')
 
     def pan(self, *args):
         super().pan(*args)
-        self._update_buttons_checked()
+        sennnlf._update_buttons_checked()
 
     def zoom(self, *args):
         super().zoom(*args)
+        self._update_buttons_checked()
+
+    def data_cursor(self, *args):
+        super().data_cursor(*args)
         self._update_buttons_checked()
 
     def set_message(self, s):

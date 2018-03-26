@@ -1481,6 +1481,7 @@ class DataCursorSelector(VertexSelector):
 
     def __init__(self, line, markers):
         VertexSelector.__init__(self, line)
+        self.annotations = []
         self.markers = markers
         self.lastind = 0
         self.cid = self.canvas.mpl_connect('key_press_event', self.onpress)
@@ -1489,6 +1490,9 @@ class DataCursorSelector(VertexSelector):
         # This may or may not be expected behaviour. This could definitely
         # cause problems in a plot with lines and markers. May need to
         # rethink this.
+        for annotation in self.annotations:
+            annotation.remove()
+        self.annotations[:] = []
         self.markers.set_data([], [])
         self.canvas.mpl_disconnect(self.cid)
         self.canvas.draw_idle()
@@ -1497,6 +1501,12 @@ class DataCursorSelector(VertexSelector):
         print(ind)
         print("xs:", xs, "ys:", ys)
         self.markers.set_data(xs, ys)
+        for annotation in self.annotations:
+            annotation.remove()
+        self.annotations[:] = []
+        self.annotations.append(self.axes.annotate
+                                ("(" + "{:.5f}".format(xs[0]) +
+                                 ", " + "{:.5f}".format(ys[0]) + ")", xy=(xs, ys)))
         self.canvas.draw_idle()
 
     def onpick(self, event):

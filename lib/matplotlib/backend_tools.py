@@ -788,7 +788,7 @@ class ToolDataCursor(ToolToggleBase):
         self.artist = event.artist
         xdata, ydata = self.artist.get_data()
         self.ind = event.ind
-        print('on pick line:', np.array([xdata[self.ind], ydata[self.ind]]).T)
+        print('ind-onpick:', self.ind)
         self.process_selected(self.ind, xdata[self.ind], ydata[self.ind])
 
     def process_selected(self, ind, xs, ys):
@@ -811,12 +811,55 @@ class ToolDataCursor(ToolToggleBase):
         if event.key not in ('a', 'd'):
             return
         if event.key == 'a':
-            inc = 1
-        else:
             inc = -1
+        else:
+            inc = 1
         xdata, ydata = self.artist.get_data()
-        self.ind = (self.ind + inc) % len(xdata)
+        if inc == 1:
+            self.ind = self.get_next(xdata)
+        else:
+            self.ind = self.get_prev(xdata)
+        print("ind:", self.ind)
         self.process_selected(self.ind, xdata[self.ind], ydata[self.ind])
+
+    # TODO: Change to Next/prev strategy (or maybe State), move into Iterator (?)
+    def get_next(self, xdata):
+        import math
+        current = math.inf
+        currentInd = self.ind
+        i = 0
+        for x in xdata:
+            if x > xdata[self.ind] and x < current:
+                current = x
+                currentInd = [i]
+            i+=1
+        i = 0
+        if currentInd == self.ind:
+            for x in xdata:
+                if x < current:
+                    current = x
+                    currentInd = [i]
+                i+=1
+        return currentInd
+
+    def get_prev(self, xdata):
+        import math
+        current = -math.inf
+        currentInd = self.ind
+        i = 0
+        for x in xdata:
+            if x < xdata[self.ind] and x > current:
+                current = x
+                currentInd = [i]
+            i+=1
+        i = 0
+        if currentInd == self.ind:
+            for x in xdata:
+                if x > current:
+                    current = x
+                    currentInd = [i]
+                i+=1
+        return currentInd
  
 
 class ZoomPanBase(ToolToggleBase):

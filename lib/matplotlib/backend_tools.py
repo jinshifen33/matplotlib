@@ -822,18 +822,23 @@ class ToolDataCursor(ToolToggleBase):
         print("ind:", self.ind)
         self.process_selected(self.ind, xdata[self.ind], ydata[self.ind])
 
-    # TODO: Change to Next/prev strategy (or maybe State), move into Iterator (?)
+    # TODO: Change to Next/prev strategy (or maybe State), move into Iterator for
+    # Artists we want to do. Also, this algorithm is probably needlessly complex.
+    # When moving, put import math at top of file. I have it here to not forget about
+    # import when moving.
     def get_next(self, xdata):
         import math
         current = math.inf
         currentInd = self.ind
         i = 0
+        # Get left-most point that is to the right of current point.
         for x in xdata:
             if x > xdata[self.ind] and x < current:
                 current = x
                 currentInd = [i]
             i+=1
         i = 0
+        # No point to right. Get left most point.
         if currentInd == self.ind:
             for x in xdata:
                 if x < current:
@@ -853,6 +858,7 @@ class ToolDataCursor(ToolToggleBase):
                 currentInd = [i]
             i+=1
         i = 0
+        # No point to left. Get right most point.
         if currentInd == self.ind:
             for x in xdata:
                 if x > current:

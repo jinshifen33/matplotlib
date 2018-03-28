@@ -2577,7 +2577,7 @@ class Axes(_AxesBase):
 
     @_preprocess_data(replace_names=["x", "explode", "labels", "colors"],
                       label_namer=None)
-    def pie(self, x, explode=None, labels=None, colors=None,
+    def pie(self, x, explode=None, labels=None, colors=None, centerlabel=None,
             autopct=None, pctdistance=0.6, shadow=False, labeldistance=1.1,
             startangle=None, radius=None, counterclock=True,
             wedgeprops=None, textprops=None, center=(0, 0),
@@ -2718,6 +2718,14 @@ class Axes(_AxesBase):
         slices = []
         autotexts = []
 
+        if centerlabel is None:
+            centerlabel = ""
+        center_x, center_y = center
+        centertext = self.text(center_x, center_y, centerlabel,
+                              horizontalalignment='center',
+                              verticalalignment='center',
+                              **textprops)
+
         i = 0
         for frac, label, expl in zip(x, labels, explode):
             x, y = center
@@ -2793,10 +2801,13 @@ class Axes(_AxesBase):
             self.set_xticks([])
             self.set_yticks([])
 
+
+
+
         if autopct is None:
-            return slices, texts
+            return slices, texts, centertext
         else:
-            return slices, texts, autotexts
+            return slices, texts, centertext, autotexts
 
     @_preprocess_data(replace_names=["x", "y", "xerr", "yerr"],
                       label_namer="y")

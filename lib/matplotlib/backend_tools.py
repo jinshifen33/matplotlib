@@ -771,6 +771,8 @@ class ToolDataCursor(ToolToggleBase):
         ToolToggleBase.__init__(self, *args)
         self.annotations = []
         self.artist = None
+        self.pressthresh = 0.25
+        self.lastpress = time.time() - self.pressthresh
 
     def enable(self, event=None):
         print("enable")
@@ -802,6 +804,8 @@ class ToolDataCursor(ToolToggleBase):
         self.canvas.draw_idle()
 
     def onpress(self, event):
+        if (time.time() - self.lastpress) < self.pressthresh:
+            return
         if self.ind is None:
             return
         if event.key not in ('a', 'd'):
@@ -811,7 +815,7 @@ class ToolDataCursor(ToolToggleBase):
         else:
             inc = -1
         xdata, ydata = self.artist.get_data()
-        self.ind = np.clip(self.ind + inc, 0, len(xdata) - 1)
+        self.ind = (self.ind + inc) % len(xdata)
         self.process_selected(self.ind, xdata[self.ind], ydata[self.ind])
  
 

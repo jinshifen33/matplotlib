@@ -2581,7 +2581,7 @@ class Axes(_AxesBase):
             autopct=None, pctdistance=0.6, shadow=False, labeldistance=1.1,
             startangle=None, radius=None, counterclock=True,
             wedgeprops=None, textprops=None, center=(0, 0),
-            frame=False, rotatelabels=False):
+            frame=False, rotatelabels=False, picker=None):
         """
         Plot a pie chart.
 
@@ -2729,6 +2729,7 @@ class Axes(_AxesBase):
             w = mpatches.Wedge((x, y), radius, 360. * min(theta1, theta2),
                                360. * max(theta1, theta2),
                                facecolor=get_next_color(),
+                               picker=picker,
                                **wedgeprops)
             slices.append(w)
             self.add_patch(w)

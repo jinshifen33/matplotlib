@@ -762,19 +762,58 @@ class SaveFigureBase(ToolBase):
     default_keymap = rcParams['keymap.save']
 
 
-class DataCursor(ToolToggleBase):
+class ToolDataCursor(ToolToggleBase):
     """Base tool for data cursor"""
     description = 'View data'
     image = 'cursor'
 
     def __init__(self, *args):
         ToolToggleBase.__init__(self, *args)
+        self.annotations = []
+        self.artist = None
 
     def enable(self, event=None):
         print("enable")
+        self.opid = self.figure.canvas.mpl_connect('key_press_event', self.onpress)
+        self.cid = self.figure.canvas.mpl_connect('pick_event', self.onpick)
 
     def disable(self, event=None):
         print("disable")
+        self.canvas.mpl_disconnect(self.cid)
+        self.canvas.mpl_disconnect(self.opid)
+
+    def onpick(self, event):
+        self.artist = event.artist
+        xdata, ydata = self.artist.get_data()
+        self.ind = event.ind
+        print('on pick line:', np.array([xdata[self.ind], ydata[self.ind]]).T)
+        self.process_selected(self.ind, xdata[self.ind], ydata[self.ind])
+
+    def process_selected(self, ind, xs, ys):
+        print(ind)
+        print("xs:", xs, "ys:", ys)
+        for annotation in self.annotations:
+            annotation.remove()
+        self.annotations[:] = []
+        for axes in self.figure.get_axes():
+            self.annotations.append(axes.annotate
+                                    ("(" + "{:.5f}".format(xs[0]) +
+                                     ", " + "{:.5f}".format(ys[0]) + ")", xy=(xs, ys)))
+        self.canvas.draw_idle()
+
+    def onpress(self, event):
+        if self.ind is None:
+            return
+        if event.key not in ('a', 'd'):
+            return
+        if event.key == 'a':
+            inc = 1
+        else:
+            inc = -1
+        xdata, ydata = self.artist.get_data()
+        self.ind = np.clip(self.ind + inc, 0, len(xdata) - 1)
+        self.process_selected(self.ind, xdata[self.ind], ydata[self.ind])
+ 
 
 class ZoomPanBase(ToolToggleBase):
     """Base class for `ToolZoom` and `ToolPan`"""

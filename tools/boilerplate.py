@@ -124,6 +124,7 @@ def boilerplate_gen():
         'contour',
         'contourf',
         'csd',
+        'doughnut',
         'errorbar',
         'eventplot',
         'fill',

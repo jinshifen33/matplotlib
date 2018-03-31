@@ -781,6 +781,8 @@ class ToolDataCursor(ToolToggleBase):
 
     def disable(self, event=None):
         print("disable")
+        self.remove_annotations()
+        self.canvas.draw_idle()
         self.canvas.mpl_disconnect(self.cid)
         self.canvas.mpl_disconnect(self.opid)
 
@@ -791,14 +793,20 @@ class ToolDataCursor(ToolToggleBase):
         print('ind-onpick:', self.ind)
         self.process_selected(self.ind, xdata[self.ind], ydata[self.ind])
 
-    def process_selected(self, ind, xs, ys):
-        print(ind)
-        print("xs:", xs, "ys:", ys)
+    def remove_annotations(self):
         for annotation in self.annotations:
             annotation.remove()
         self.annotations[:] = []
+
+    def process_selected(self, ind, xs, ys):
+        print(ind)
+        print("xs:", xs, "ys:", ys)
+        self.remove_annotations()
         for axes in self.figure.get_axes():
-            self.annotations.append(axes.annotate("(%.5f, %.5f)" % (xs, ys), xy=(xs, ys)))
+            self.annotations.append(axes.annotate("%.5f, %.5f" % (xs, ys), xy=(xs, ys),
+                                                  xytext=(0, -17), textcoords='offset points',
+                                                  va="bottom", ha="center", xycoords="data",
+                                                  bbox=dict(boxstyle="round", fc="w")))
         self.canvas.draw_idle()
 
     def onpress(self, event):

@@ -798,9 +798,7 @@ class ToolDataCursor(ToolToggleBase):
             annotation.remove()
         self.annotations[:] = []
         for axes in self.figure.get_axes():
-            self.annotations.append(axes.annotate
-                                    ("(" + "{:.5f}".format(xs[0]) +
-                                     ", " + "{:.5f}".format(ys[0]) + ")", xy=(xs, ys)))
+            self.annotations.append(axes.annotate("(%.5f, %.5f)" % (xs, ys), xy=(xs, ys)))
         self.canvas.draw_idle()
 
     def onpress(self, event):

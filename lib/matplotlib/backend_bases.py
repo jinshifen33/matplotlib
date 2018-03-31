@@ -2752,7 +2752,6 @@ class NavigationToolbar2(object):
         ('Subplots', 'Configure subplots', 'subplots', 'configure_subplots'),
         (None, None, None, None),
         ('Save', 'Save the figure', 'filesave', 'save_figure'),
-        ('Data', 'Data cursor', 'filesave', 'data_cursor'),
       )
 
     def __init__(self, canvas):
@@ -3181,31 +3180,6 @@ class NavigationToolbar2(object):
 
     def set_history_buttons(self):
         """Enable or disable the back/forward button."""
-
-    def data_cursor(self, *args):
-        """navigate through the plot data"""
-
-        print(self._active)
-
-        if self._active == 'DATA':
-            self._active = None
-        else:
-            self._active = 'DATA'
-
-        if self._active:
-            self.selectors = []
-            for ax in self.canvas.figure.get_axes():
-                markers, = ax.plot([], [], 'ks')
-                for line in ax.lines:
-                    line.set_picker(5)
-                    self.selectors.append(DataCursorSelector(line, markers))
-                print(self.selectors)
-        else:
-            print("Enter else")
-            for selector in self.selectors:
-                selector.remove_events()
-            self.selectors = []
-
 
 class ToolContainerBase(object):
     """

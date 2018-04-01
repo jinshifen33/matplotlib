@@ -1081,25 +1081,40 @@ class Wedge(Patch):
         self.center = center
         self.stale = True
 
+    def get_center(self):
+        return self.center
+
     def set_radius(self, radius):
         self._path = None
         self.r = radius
         self.stale = True
+
+    def get_radius(self):
+        return self.r
 
     def set_theta1(self, theta1):
         self._path = None
         self.theta1 = theta1
         self.stale = True
 
+    def get_theta1(self):
+        return self.theta1
+
     def set_theta2(self, theta2):
         self._path = None
         self.theta2 = theta2
         self.stale = True
 
+    def get_theta2(self):
+        return self.theta2
+
     def set_width(self, width):
         self._path = None
         self.width = width
         self.stale = True
+
+    def get_width(self):
+        return self.width
 
     def get_path(self):
         if self._path is None:

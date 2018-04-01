@@ -2553,7 +2553,7 @@ class Axes(_AxesBase):
         else:
             basestyle, basemarker, basecolor = _process_plot_format(basefmt)
 
-        markerline, = self.plot(x, y, color=markercolor, linestyle=markerstyle,
+        markerlinge, = self.plot(x, y, color=markercolor, linestyle=markerstyle,
                                 marker=markermarker, label="_nolegend_")
 
         stemlines = []
@@ -2575,6 +2575,213 @@ class Axes(_AxesBase):
 
         return stem_container
     
+    def extend_wedge(self, wedge, children, labels=None, coloropt=None, colors=None,
+                     shadow=False, width=0.1, gap=False, textprops=None, 
+                     rotatelabels=False, picker=None, labeldistance=1.1, 
+                     counterclock=True): 
+        """
+        Given a wedge, make a level of hierarchy wedge using children.
+
+        the children wedges are ploted counterclockwisely
+
+        Parameters
+        ----------
+        wedge : a wedge artist
+
+        children:  list
+                  each represents % of arc length from the parent ,
+
+        width: numerical, optional, defualt 0.1
+                the width of children wedge
+
+        gap: bool, optional, default: False
+                if True, a smal gap(1% of width) will be left between each child, 
+                and between child and the *parent*
+
+        labels:  list, optional, default: None
+                 if not *None*, a sequence of string providing lables for each child
+
+        coloropt: string, optional, defualt: None
+                  It not *None*, it will override the given colors
+
+                  it can be one of three followings:  
+                    "same" => the same color as wedge
+                    "weak" => the same color with slightly less alpha value >= 0.4
+                    "strong" => the same color with slightly larger alpha value <= 1
+
+        colors:  list, optional, default: None
+                 A sequence of matplotlib color args through which the doughnut chart
+                 will cycle.  If *None*, will use the colors in the currently
+                 active cycle.
+        
+        shadow : bool, optional, default: False
+                 Draw a shadow beneath the wedge
+
+        labeldistance : float, optional, default: 1.1
+            The radial distance with respect to the inner radius
+            of the wedge at which the labels are drawn
+
+        counterclock : bool, optional, default: True
+            Specify fractions direction, clockwise or counterclockwise.
+
+        textprops : dict, optional, default: None
+            Dict of arguments to pass to the text objects.
+
+        rotatelabels : bool, optional, default: False
+            Rotate each label to the angle of the corresponding slice if true.
+
+        picker: optional, default: None
+                see picker arg in artist for detail.
+                This will be passed into children wedge creation
+        """
+        children = np.array(children, np.float32)
+
+        if labels is None:
+            labels = [''] * len(children)
+    
+        if len(children) != len(labels):
+            raise ValueError("'label' must be of length 'x'")
+
+        if coloropt is None:
+
+            if colors is not None:
+                color_cycle = itertools.cycle(colors)
+
+                def get_next_color():
+                    return next(color_cycle)
+            else:     
+                get_next_color = self._get_patches_for_fill.get_next_color
+
+        else:
+            
+            def get_next_color():
+                (r,g,b,a) = wedge.get_facecolor()
+                if coloropt=="same":
+                    factor = 1
+                elif coloropt=="weak":
+                    factor = 0.9
+                elif coloropt=="strong":
+                    factor = 1.1 
+                color = (r,g,b,a * factor)
+                return mcolors.to_rgba(color)
+
+
+        if textprops is None:
+            textprops = {}
+        textprops.setdefault('clip_on', False)
+        
+        r_gap =  max(0.01, 0.1 * width) if gap else 0 
+        radius = wedge.get_radius() + width+ r_gap
+
+        center = wedge.get_center()
+        
+        theta_gap = 0.005 * (wedge.get_theta2() - wedge.get_theta1())
+        total_theta = (wedge.get_theta2() - wedge.get_theta1() - (len(children)) * theta_gap)
+
+        theta1 = wedge.get_theta1() + theta_gap/2 if counterclock else wedge.get_theta2() - theta_gap/2
+        
+        texts = []
+        slices = []
+        autotexts = []
+
+        i = 0
+        for frac, label in zip(children, labels):
+            delta = frac * total_theta
+            (x, y) = center
+            
+            theta2 = (theta1 + delta) if counterclock else (theta1 - delta)
+
+            thetam = np.pi * (theta1 + theta2)
+            w = mpatches.Wedge(center, radius, theta1, theta2,
+                               width=width,
+                               facecolor=get_next_color(),
+                               picker=picker)
+            slices.append(w)
+            self.add_patch(w)
+            w.set_label(label)
+
+            if shadow:
+                # make sure to add a shadow after the call to
+                # add_patch so the figure and transform props will be
+                # set
+                shad = mpatches.Shadow(w, -0.02, -0.02)
+                shad.set_zorder(0.9 * w.get_zorder())
+                shad.set_label('_nolegend_')
+                self.add_patch(shad)
+
+            xt = x + labeldistance * radius * math.cos(thetam)
+            yt = y + labeldistance * radius * math.sin(thetam)
+            label_alignment_h = xt > 0 and 'left' or 'right'
+            label_alignment_v = 'center'
+            label_rotation = 'horizontal'
+            if rotatelabels:
+                label_alignment_v = yt > 0 and 'bottom' or 'top'
+                label_rotation = np.rad2deg(thetam) + (0 if xt > 0 else 180)
+
+            t = self.text(xt, yt, label,
+                          size=rcParams['xtick.labelsize'],
+                          horizontalalignment=label_alignment_h,
+                          verticalalignment=label_alignment_v,
+                          rotation=label_rotation,
+                          **textprops)
+
+            texts.append(t)
+
+            theta1 = theta2 + theta_gap if counterclock else theta2 - theta_gap
+            i += 1
+        return slices, texts
+
+    def extend_circle_chart(self, parents, children_array, labels=None, coloropt=None, colors=None,
+                     shadow=False, width=0.1, gap=False, textprops=None, 
+                     rotatelabels=False, picker=None, labeldistance=1.1, 
+                     counterclock=True):
+        """
+        Given a pie/doughnut chart reprensentd by *root_patches*.
+    
+        Make a level of sunburst using elements, where each element is a array
+        representing the children of corresponding patch
+
+        The sum(children) is not normalized, and it should be <= 1 to avoid overflow
+        
+        The children are plotted counterclockwise, by default starting from the
+        x-axis
+
+        Parameters
+        ----------
+        patches : array-like
+            an array of patches.
+
+        
+        """
+        children_array = [np.array(children, np.float32) for children in children_array]
+
+        if labels is None:
+            labels = [  ['']*len(children) for children in children_array]
+    
+        if(len(children_array) != len(parents)):
+            raise ValueError("'children_array' must be of length 'parents'")
+
+        if (len(children_array) != len(labels)):
+            raise ValueError("'labels' must be of length 'children_array'")
+
+        for i in range(len(children_array)):
+            if(len(children_array[i]) != len(labels[i])):
+                raise ValueError("'label' must be of length 'children'")
+        
+        slices_res = []
+        labels_res = []
+        for i in range(len(parents)):
+            print(parents[i].get_theta1(), parents[i].get_theta2())
+            (slices, all_labels) = self.extend_wedge(parents[i], children_array[i], labels=labels[i]
+                                                , coloropt=coloropt, colors=colors, shadow=shadow,
+                                                width=width, gap=gap, textprops=textprops,
+                                                rotatelabels=rotatelabels, picker=picker, 
+                                                labeldistance=labeldistance, counterclock=counterclock)
+            slices_res.append(slices)
+            labels_res.append(all_labels)
+        return slices_res, labels_res
+
+
     @_preprocess_data(replace_names=["x", "explode", "labels", "colors"],
                       label_namer=None)
     def doughnut(self, x, explode=None, labels=None, colors=None,

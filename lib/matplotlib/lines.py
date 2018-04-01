@@ -13,6 +13,7 @@ from numbers import Number
 import warnings
 
 import numpy as np
+import math
 
 from . import artist, cbook, colors as mcolors, docstring, rcParams
 from .artist import Artist, allow_rasterization
@@ -21,6 +22,7 @@ from .cbook import (
     STEP_LOOKUP_MAP)
 from .markers import MarkerStyle
 from .path import Path
+from .backend_tools import DataCursorIterator
 from .transforms import Bbox, TransformedPath, IdentityTransform
 
 # Imported here for backward compatibility, even though they don't
@@ -427,6 +429,73 @@ class Line2D(Artist):
         self._x_filled = None  # used in subslicing; only x is needed
 
         self.set_data(xdata, ydata)
+
+    class LineIterator(DataCursorIterator):
+        def __init__(self):
+            DataCursorIterator.__init__(self)
+
+        def get_next(self, data):
+            if self.ind != len(data) - 1:
+                return (self.ind + 1) % len(data)
+            return self.ind
+
+        def get_prev(self, data):
+            if self.ind != 0:
+                return (self.ind - 1) % len(data)
+            return self.ind
+
+    class MarkerIterator(DataCursorIterator):
+        def __init__(self):
+            DataCursorIterator.__init__(self)
+
+        def get_next(self, data):
+            current = math.inf
+            # Holds the currently best index
+            current_ind = self.ind
+            i = 0
+            # Get left-most point that is to the right of current point.
+            for x in data:
+                if current > x > data[self.ind]:
+                    current = x
+                    current_ind = [i]
+                i += 1
+            i = 0
+            # No point to right. Get left most point.
+            if current_ind == self.ind:
+                for x in data:
+                    if x < current:
+                        current = x
+                        current_ind = [i]
+                    i += 1
+            self.ind = current_ind
+            return self.ind
+
+        def get_prev(self, data):
+            current = -math.inf
+            # Holds the currently best index
+            current_ind = self.ind
+            i = 0
+            for x in data:
+                if current < x < data[self.ind]:
+                    current = x
+                    current_ind = i
+                i += 1
+            i = 0
+            # No point to left. Get right most point.
+            if current_ind == self.ind:
+                for x in data:
+                    if x > current:
+                        current = x
+                        current_ind = i
+                    i += 1
+            self.ind = current_ind
+            return self.ind
+
+    def create_data_cursor_iterator(self):
+        if (not (self.get_linestyle() == "None") and
+                (not self.is_dashed())):
+            return self.LineIterator()
+        return self.MarkerIterator()
 
     def contains(self, mouseevent):
         """

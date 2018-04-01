@@ -769,10 +769,10 @@ class ToolDataCursor(ToolToggleBase):
 
     def __init__(self, *args):
         ToolToggleBase.__init__(self, *args)
+
+        self.press_thresh = 0.25
         self.annotations = []
         self.artist = None
-        self.press_thresh = 0.25
-        self.ind = None
         self.iterator = None
         self.on_press_id = None
         self.on_pick_id = None
@@ -792,6 +792,10 @@ class ToolDataCursor(ToolToggleBase):
         self.canvas.draw_idle()
         self.canvas.mpl_disconnect(self.on_pick_id)
         self.canvas.mpl_disconnect(self.on_press_id)
+        # Reset
+        self.interp_ind = 0
+        self.last_direction = 0
+
 
     def onpick(self, event):
         self.artist = event.artist

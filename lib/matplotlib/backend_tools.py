@@ -772,7 +772,10 @@ class ToolDataCursor(ToolToggleBase):
         self.annotations = []
         self.artist = None
         self.pressthresh = 0.25
-        self.last_ind = 1
+        self.ind = None
+        self.interp_ind = 0
+        # -1: Left, 1: Right
+        self.last_direction = 0
         self.lastpress = time.time() - self.pressthresh
 
     def enable(self, event=None):
@@ -821,25 +824,47 @@ class ToolDataCursor(ToolToggleBase):
         else:
             inc = 1
         xdata, ydata = self.artist.get_data()
-        if inc == 1:
-            new_ind = self.get_next(xdata)
-        else:
-            new_ind = self.get_prev(xdata)
         # if this is a line, need to interpolate between points
         # for now just looking at a solid line
         if (not (self.artist.get_linestyle() == "None") and
                 (not self.artist.is_dashed())):
+
+            if self.last_direction != 0 and inc != self.last_direction:
+                # Reverse direction
+                if ((inc == 1 and self.ind[0] == 0) or
+                        (inc == -1 and self.ind[0] == (len(xdata) - 1))):
+                    self.ind = [self.ind[0]]
+                    self.interp_ind = 20 - self.interp_ind
+                else:
+                    self.ind = [self.ind[0] - inc]
+                    self.interp_ind = 20 - self.interp_ind
+
+            if inc == 1:
+                if self.ind[0] == len(xdata) - 1:
+                    new_ind = self.ind
+                else:
+                    new_ind = [(self.ind[0] + 1) % len(xdata)]
+            else:
+                if self.ind[0] == 0:
+                    new_ind = self.ind
+                else:
+                    new_ind = [(self.ind[0] - 1) % len(xdata)]
+            self.interp_ind += 1
             x_pts = np.array([xdata[self.ind[0]], xdata[new_ind[0]]])
             x_pts = cbook.simple_linear_interpolation(x_pts, 20)
             y_pts = np.array([ydata[self.ind[0]], ydata[new_ind[0]]])
             y_pts = cbook.simple_linear_interpolation(y_pts, 20)
-            self.process_selected(x_pts[self.last_ind], y_pts[self.last_ind])
-            if (x_pts[self.last_ind] == xdata[new_ind]):
-                self.last_ind = 1
+            self.process_selected(x_pts[self.interp_ind], y_pts[self.interp_ind])
+            if x_pts[self.interp_ind] == xdata[new_ind]:
+                self.interp_ind = 0
                 self.ind = new_ind
-            else:
-                self.last_ind += 1
+            self.last_direction = inc
             return
+        if inc == 1:
+            new_ind = self.get_next(xdata)
+        else:
+            new_ind = self.get_prev(xdata)
+
         self.ind = new_ind
         print("ind:", self.ind)
         self.process_selected(xdata[new_ind], ydata[new_ind])

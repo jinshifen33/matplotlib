@@ -772,6 +772,7 @@ class ToolDataCursor(ToolToggleBase):
         self.annotations = []
         self.artist = None
         self.pressthresh = 0.25
+        self.last_ind = 1
         self.lastpress = time.time() - self.pressthresh
 
     def enable(self, event=None):
@@ -791,15 +792,14 @@ class ToolDataCursor(ToolToggleBase):
         xdata, ydata = self.artist.get_data()
         self.ind = event.ind
         print('ind-onpick:', self.ind)
-        self.process_selected(self.ind, xdata[self.ind], ydata[self.ind])
+        self.process_selected(xdata[self.ind], ydata[self.ind])
 
     def remove_annotations(self):
         for annotation in self.annotations:
             annotation.remove()
         self.annotations[:] = []
 
-    def process_selected(self, ind, xs, ys):
-        print(ind)
+    def process_selected(self, xs, ys):
         print("xs:", xs, "ys:", ys)
         self.remove_annotations()
         for axes in self.figure.get_axes():
@@ -822,11 +822,27 @@ class ToolDataCursor(ToolToggleBase):
             inc = 1
         xdata, ydata = self.artist.get_data()
         if inc == 1:
-            self.ind = self.get_next(xdata)
+            new_ind = self.get_next(xdata)
         else:
-            self.ind = self.get_prev(xdata)
+            new_ind = self.get_prev(xdata)
+        # if this is a line, need to interpolate between points
+        # for now just looking at a solid line
+        if (not (self.artist.get_linestyle() == "None") and
+                (not self.artist.is_dashed())):
+            x_pts = np.array([xdata[self.ind[0]], xdata[new_ind[0]]])
+            x_pts = cbook.simple_linear_interpolation(x_pts, 20)
+            y_pts = np.array([ydata[self.ind[0]], ydata[new_ind[0]]])
+            y_pts = cbook.simple_linear_interpolation(y_pts, 20)
+            self.process_selected(x_pts[self.last_ind], y_pts[self.last_ind])
+            if (x_pts[self.last_ind] == xdata[new_ind]):
+                self.last_ind = 1
+                self.ind = new_ind
+            else:
+                self.last_ind += 1
+            return
+        self.ind = new_ind
         print("ind:", self.ind)
-        self.process_selected(self.ind, xdata[self.ind], ydata[self.ind])
+        self.process_selected(xdata[new_ind], ydata[new_ind])
 
     # TODO: Change to Next/prev strategy (or maybe State), move into Iterator for
     # Artists we want to do. Also, this algorithm is probably needlessly complex.

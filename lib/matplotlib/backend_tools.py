@@ -835,39 +835,23 @@ class ToolDataCursor(ToolToggleBase):
         else:
             inc = 1
         xdata, ydata = self.artist.get_data()
+
         # if this is a line, need to interpolate between points
         # for now just looking at a solid line
         if (not (self.artist.get_linestyle() == "None") and
                 (not self.artist.is_dashed())):
-            # When switching directions, we have to make sure the new interpolation
-            # interval is correct. On a standard interval (one with another interval
-            # to left and right), we shift opposite to the new direction. This will
-            # give us our old interval in the opposite direction. We then modify the
-            # interp_ind to get our old point again. Edge cases include intervals with
-            # no interval to the left and right. In this case, we don't shift and we
-            # have no need to modify the interp_id.
             if self.last_direction != 0 and inc != self.last_direction:
                 # Reverse direction
-                if not ((inc == 1 and self.iterator.get_ind() == 0) or
-                        (inc == -1 and self.iterator.get_ind() == (len(xdata) - 1))):
-                    self.iterator.set_ind(self.iterator.get_ind() - inc)
-                    self.interp_ind = 20 - self.interp_ind
-            self.interp_ind += 1
+                self.iterator.direction_change(xdata, inc)
 
-            ind = self.iterator.get_ind()
+            prev_ind = self.iterator.get_ind()
             if inc == 1:
-                new_ind = self.iterator.get_next(xdata)
+                new_ind, interp_ind = self.iterator.get_next(xdata)
             else:
-                new_ind = self.iterator.get_prev(xdata)
+                new_ind, interp_ind = self.iterator.get_prev(xdata)
 
-            x_pts = np.array([xdata[ind], xdata[new_ind]])
-            x_pts = cbook.simple_linear_interpolation(x_pts, 20)
-            y_pts = np.array([ydata[ind], ydata[new_ind]])
-            y_pts = cbook.simple_linear_interpolation(y_pts, 20)
-            self.process_selected(x_pts[self.interp_ind], y_pts[self.interp_ind])
-            if x_pts[self.interp_ind] == xdata[[new_ind]]:
-                self.interp_ind = 0
-                self.iterator.set_ind(new_ind)
+            x_interp, y_interp = self.iterator.get_interpolation(prev_ind, new_ind, xdata, ydata)
+            self.process_selected(x_interp, y_interp)
             self.last_direction = inc
             return
 

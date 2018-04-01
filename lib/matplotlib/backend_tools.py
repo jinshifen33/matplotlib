@@ -773,6 +773,7 @@ class ToolDataCursor(ToolToggleBase):
         self.artist = None
         self.press_thresh = 0.25
         self.ind = None
+        self.iterator = None
         self.on_press_id = None
         self.on_pick_id = None
         # Index in the interpolation interval.
@@ -795,9 +796,13 @@ class ToolDataCursor(ToolToggleBase):
     def onpick(self, event):
         self.artist = event.artist
         xdata, ydata = self.artist.get_data()
-        self.ind = event.ind
-        print('ind-onpick:', self.ind)
-        self.process_selected(xdata[self.ind], ydata[self.ind])
+        try:
+            self.iterator = self.artist.create_data_cursor_iterator()
+            self.iterator.set_ind(event.ind)
+            print('ind-onpick:', self.iterator.get_ind())
+            self.process_selected(xdata[self.iterator.get_ind()], ydata[self.iterator.get_ind()])
+        except Exception as e:
+            print(e)
 
     def remove_annotations(self):
         for annotation in self.annotations:
@@ -817,7 +822,7 @@ class ToolDataCursor(ToolToggleBase):
     def onpress(self, event):
         if (time.time() - self.last_press) < self.press_thresh:
             return
-        if self.ind is None:
+        if self.iterator is None:
             return
         if event.key not in ('a', 'd'):
             return
@@ -830,7 +835,6 @@ class ToolDataCursor(ToolToggleBase):
         # for now just looking at a solid line
         if (not (self.artist.get_linestyle() == "None") and
                 (not self.artist.is_dashed())):
-
             # When switching directions, we have to make sure the new interpolation
             # interval is correct. On a standard interval (one with another interval
             # to left and right), we shift opposite to the new direction. This will
@@ -840,89 +844,52 @@ class ToolDataCursor(ToolToggleBase):
             # have no need to modify the interp_id.
             if self.last_direction != 0 and inc != self.last_direction:
                 # Reverse direction
-                if ((inc == 1 and self.ind[0] == 0) or
-                        (inc == -1 and self.ind[0] == (len(xdata) - 1))):
-                    self.ind = [self.ind[0]]
-                else:
-                    self.ind = [self.ind[0] - inc]
+                if not ((inc == 1 and self.iterator.get_ind() == 0) or
+                        (inc == -1 and self.iterator.get_ind() == (len(xdata) - 1))):
+                    self.iterator.set_ind(self.iterator.get_ind() - inc)
                     self.interp_ind = 20 - self.interp_ind
             self.interp_ind += 1
 
+            ind = self.iterator.get_ind()
             if inc == 1:
-                if self.ind[0] == len(xdata) - 1:
-                    new_ind = self.ind
-                else:
-                    new_ind = [(self.ind[0] + 1) % len(xdata)]
+                new_ind = self.iterator.get_next(xdata)
             else:
-                if self.ind[0] == 0:
-                    new_ind = self.ind
-                else:
-                    new_ind = [(self.ind[0] - 1) % len(xdata)]
+                new_ind = self.iterator.get_prev(xdata)
 
-            x_pts = np.array([xdata[self.ind[0]], xdata[new_ind[0]]])
+            x_pts = np.array([xdata[ind], xdata[new_ind]])
             x_pts = cbook.simple_linear_interpolation(x_pts, 20)
-            y_pts = np.array([ydata[self.ind[0]], ydata[new_ind[0]]])
+            y_pts = np.array([ydata[ind], ydata[new_ind]])
             y_pts = cbook.simple_linear_interpolation(y_pts, 20)
             self.process_selected(x_pts[self.interp_ind], y_pts[self.interp_ind])
-            if x_pts[self.interp_ind] == xdata[new_ind]:
+            if x_pts[self.interp_ind] == xdata[[new_ind]]:
                 self.interp_ind = 0
-                self.ind = new_ind
+                self.iterator.set_ind(new_ind)
             self.last_direction = inc
             return
-        if inc == 1:
-            new_ind = self.get_next(xdata)
-        else:
-            new_ind = self.get_prev(xdata)
 
-        self.ind = new_ind
-        print("ind:", self.ind)
+        if inc == 1:
+            new_ind = [self.iterator.get_next(xdata)]
+        else:
+            new_ind = [self.iterator.get_prev(xdata)]
         self.process_selected(xdata[new_ind], ydata[new_ind])
 
-    # TODO: Change to Next/prev strategy (or maybe State), move into Iterator for
-    # Artists we want to do. Also, this algorithm is probably needlessly complex.
-    # When moving, put import math at top of file. I have it here to not forget about
-    # import when moving.
-    def get_next(self, xdata):
-        import math
-        current = math.inf
-        currentInd = self.ind
-        i = 0
-        # Get left-most point that is to the right of current point.
-        for x in xdata:
-            if x > xdata[self.ind] and x < current:
-                current = x
-                currentInd = [i]
-            i+=1
-        i = 0
-        # No point to right. Get left most point.
-        if currentInd == self.ind:
-            for x in xdata:
-                if x < current:
-                    current = x
-                    currentInd = [i]
-                i+=1
-        return currentInd
 
-    def get_prev(self, xdata):
-        import math
-        current = -math.inf
-        currentInd = self.ind
-        i = 0
-        for x in xdata:
-            if x < xdata[self.ind] and x > current:
-                current = x
-                currentInd = [i]
-            i+=1
-        i = 0
-        # No point to left. Get right most point.
-        if currentInd == self.ind:
-            for x in xdata:
-                if x > current:
-                    current = x
-                    currentInd = [i]
-                i+=1
-        return currentInd
- 
+class DataCursorIterator:
+    def __init__(self):
+        self.ind = 0
+
+    def get_ind(self):
+        return self.ind
+
+    def set_ind(self, ind):
+        self.ind = ind
+
+    def get_next(self, data):
+        pass
+
+    def get_prev(self, data):
+        pass
+
 
 class ZoomPanBase(ToolToggleBase):
     """Base class for `ToolZoom` and `ToolPan`"""

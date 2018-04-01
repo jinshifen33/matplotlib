@@ -2553,7 +2553,7 @@ class Axes(_AxesBase):
         else:
             basestyle, basemarker, basecolor = _process_plot_format(basefmt)
 
-        markerlinge, = self.plot(x, y, color=markercolor, linestyle=markerstyle,
+        markerline, = self.plot(x, y, color=markercolor, linestyle=markerstyle,
                                 marker=markermarker, label="_nolegend_")
 
         stemlines = []

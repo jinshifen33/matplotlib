@@ -450,13 +450,13 @@ class Line2D(Artist):
                 self.interp_ind = self.steps - self.interp_ind
 
         def get_next(self, data):
-            self.interp_ind += 1
+            self.interp_ind += 1 % self.steps
             if self.ind != len(data) - 1:
                 return (self.ind + 1) % len(data), self.interp_ind
             return self.ind, self.interp_ind
 
         def get_prev(self, data):
-            self.interp_ind += 1
+            self.interp_ind += 1 % self.steps
             if self.ind != 0:
                 return (self.ind - 1) % len(data), self.interp_ind
             return self.ind, self.interp_ind

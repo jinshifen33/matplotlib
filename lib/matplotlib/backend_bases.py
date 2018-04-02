@@ -55,7 +55,6 @@ from matplotlib import (
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.transforms import Bbox, TransformedBbox, Affine2D
 from matplotlib.path import Path
-from matplotlib.lines import DataCursorSelector
 
 try:
     from PIL import Image

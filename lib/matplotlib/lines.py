@@ -1587,64 +1587,6 @@ class VertexSelector(object):
         self.process_selected(ind, xdata[ind], ydata[ind])
 
 
-
-class DataCursorSelector(VertexSelector):
-    """Class responsible for handling pick events for a line to handle
-    DataCursor behaviour."""
-
-    def __init__(self, line, markers):
-        VertexSelector.__init__(self, line)
-        self.annotations = []
-        self.markers = markers
-        self.lastind = 0
-        self.cid = self.canvas.mpl_connect('key_press_event', self.onpress)
-
-    def remove_events(self):
-        # This may or may not be expected behaviour. This could definitely
-        # cause problems in a plot with lines and markers. May need to
-        # rethink this.
-        for annotation in self.annotations:
-            annotation.remove()
-        self.annotations[:] = []
-        self.markers.set_data([], [])
-        self.canvas.mpl_disconnect(self.cid)
-        self.canvas.draw_idle()
-
-    def process_selected(self, ind, xs, ys):
-        print(ind)
-        print("xs:", xs, "ys:", ys)
-        self.markers.set_data(xs, ys)
-        for annotation in self.annotations:
-            annotation.remove()
-        self.annotations[:] = []
-        self.annotations.append(self.axes.annotate
-                                ("(" + "{:.5f}".format(xs[0]) +
-                                 ", " + "{:.5f}".format(ys[0]) + ")", xy=(xs, ys)))
-        self.canvas.draw_idle()
-
-    def onpick(self, event):
-        """When the line is picked, update the set of selected indices."""
-        if event.artist is not self.line:
-            return
-        self.ind = event.ind
-        xdata, ydata = self.line.get_data()
-        self.process_selected(self.ind, xdata[self.ind], ydata[self.ind])
-
-    def onpress(self, event):
-        if self.ind is None:
-            return
-        if event.key not in ('a', 'd'):
-            return
-        if event.key == 'a':
-            inc = 1
-        else:
-            inc = -1
-        xdata, ydata = self.line.get_data()
-        self.ind += inc
-        self.ind = np.clip(self.ind, 0, len(xdata) - 1)
-        self.process_selected(self.ind, xdata[self.ind], ydata[self.ind])
-
-
 lineStyles = Line2D._lineStyles
 lineMarkers = MarkerStyle.markers
 drawStyles = Line2D.drawStyles

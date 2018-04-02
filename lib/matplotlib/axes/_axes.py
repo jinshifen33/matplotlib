@@ -2576,8 +2576,8 @@ class Axes(_AxesBase):
         return stem_container
     
     def extend_wedge(self, wedge, children, labels=None, coloropt=None, colors=None,
-                     shadow=False, width=0.1, gap=False, textprops=None, 
-                     rotatelabels=False, picker=None, labeldistance=1.1, 
+                     shadow=False, width=1, gap=0, textprops=None, 
+                     rotatelabels=False, picker=None, labeldistance=0.3,
                      counterclock=True): 
         """
         Given a wedge, make a level of hierarchy wedge using children.
@@ -2591,12 +2591,11 @@ class Axes(_AxesBase):
         children:  list
                   each represents % of arc length from the parent ,
 
-        width: numerical, optional, defualt 0.1
+        width: number, optional, defualt 1
                 the width of children wedge
 
-        gap: bool, optional, default: False
-                if True, a smal gap(1% of width) will be left between each child, 
-                and between child and the *parent*
+        gap: number, optional, default: 0
+                a specific the gap between each level of ring, and between each child 
 
         labels:  list, optional, default: None
                  if not *None*, a sequence of string providing lables for each child
@@ -2606,8 +2605,7 @@ class Axes(_AxesBase):
 
                   it can be one of three followings:  
                     "same" => the same color as wedge
-                    "weak" => the same color with slightly less alpha value >= 0.4
-                    "strong" => the same color with slightly larger alpha value <= 1
+                    "weak" => the same color with slightly less alpha value
 
         colors:  list, optional, default: None
                  A sequence of matplotlib color args through which the doughnut chart
@@ -2617,7 +2615,7 @@ class Axes(_AxesBase):
         shadow : bool, optional, default: False
                  Draw a shadow beneath the wedge
 
-        labeldistance : float, optional, default: 1.1
+        labeldistance : float, optional, default: 0
             The radial distance with respect to the inner radius
             of the wedge at which the labels are drawn
 
@@ -2659,9 +2657,7 @@ class Axes(_AxesBase):
                 if coloropt=="same":
                     factor = 1
                 elif coloropt=="weak":
-                    factor = 0.9
-                elif coloropt=="strong":
-                    factor = 1.1 
+                    factor = 0.85
                 color = (r,g,b,a * factor)
                 return mcolors.to_rgba(color)
 
@@ -2670,30 +2666,25 @@ class Axes(_AxesBase):
             textprops = {}
         textprops.setdefault('clip_on', False)
         
-        r_gap =  max(0.01, 0.01 * width) if gap else 0 
-        radius = wedge.get_radius() + width+ r_gap
-
+        radius = wedge.get_radius() + width
         center = wedge.get_center()
-        
-        theta_gap = 0.005 * (wedge.get_theta2() - wedge.get_theta1())
-        total_theta = (wedge.get_theta2() - wedge.get_theta1() - (len(children)) * theta_gap)
 
-        theta1 = wedge.get_theta1() + theta_gap/2 if counterclock else wedge.get_theta2() - theta_gap/2
         
         texts = []
         slices = []
         autotexts = []
-
-        i = 0
+        theta1 = wedge.get_theta1() if counterclock else wedge.get_theta2()
+        
         for frac, label in zip(children, labels):
-            delta = frac * total_theta
+            delta = frac * (wedge.get_theta2() - wedge.get_theta1())
             (x, y) = center
-            
             theta2 = (theta1 + delta) if counterclock else (theta1 - delta)
-
             thetam = theta1 + (theta2 - theta1 )/ 2 if counterclock  else theta1 - (theta2 - theta1 )/ 2
-           
-            w = mpatches.Wedge(center, radius, theta1, theta2,
+            if(gap):
+                x += 0.05 * math.cos(math.radians(thetam)) 
+                y += 0.05 * math.sin(math.radians(thetam)) 
+
+            w = mpatches.Wedge((x,y), radius, theta1, theta2,
                                width=width,
                                facecolor=get_next_color(),
                                picker=picker)
@@ -2705,14 +2696,12 @@ class Axes(_AxesBase):
                 # make sure to add a shadow after the call to
                 # add_patch so the figure and transform props will be
                 # set
-                print("asd")
                 shad = mpatches.Shadow(w, -0.02, -0.02)
                 shad.set_zorder(0.9 * w.get_zorder())
                 shad.set_label('_nolegend_')
-     
+            
             xt = (x + labeldistance + wedge.get_radius()) * math.cos(math.radians(thetam))
             yt = (y + labeldistance + wedge.get_radius()) * math.sin(math.radians(thetam))
-            print(x, y, xt,yt)
             
             label_alignment_h = xt > 0 and 'left' or 'right'
             label_alignment_v = 'center'
@@ -2730,14 +2719,14 @@ class Axes(_AxesBase):
 
             texts.append(t)
 
-            theta1 = theta2 + theta_gap if counterclock else theta2 - theta_gap
-            i += 1
+            theta1 = theta2
+
         return slices, texts
 
-    def extend_circle_chart(self, parents, children_array, labels=None, coloropt=None, colors=None,
-                     shadow=False, width=0.1, gap=False, textprops=None, 
-                     rotatelabels=False, picker=None, labeldistance=1.1, 
-                     counterclock=True):
+    def extend_circle_chart(self, parents, children_array, labels=None, 
+                            coloropt=None, colors=None, counterclock=True,
+                            shadow=False, width=1, gap=0, textprops=None, 
+                     rotatelabels=False, picker=None, labeldistance=0.3):
         """
         Given a pie/doughnut chart reprensentd by *root_patches*.
     

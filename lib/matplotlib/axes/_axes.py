@@ -2887,49 +2887,6 @@ class Axes(_AxesBase):
         The doughnut chart will probably look best if the figure and axes are
         square, or the Axes aspect is equal.
         """
-        x = np.array(x, np.float32)
-
-        sx = x.sum()
-        if sx > 1:
-            x /= sx
-
-        if labels is None:
-            labels = [''] * len(x)
-        if explode is None:
-            explode = [0] * len(x)
-        if len(x) != len(labels):
-            raise ValueError("'label' must be of length 'x'")
-        if len(x) != len(explode):
-            raise ValueError("'explode' must be of length 'x'")
-        if colors is None:
-            get_next_color = self._get_patches_for_fill.get_next_color
-        else:
-            color_cycle = itertools.cycle(colors)
-
-            def get_next_color():
-                return next(color_cycle)
-
-        if radius is None:
-            radius = 1
-
-        # Starting theta1 is the start fraction of the circle
-        if startangle is None:
-            theta1 = 0
-        else:
-            theta1 = startangle / 360.0
-
-        # set default values in wedge_prop
-        if wedgeprops is None:
-            wedgeprops = {}
-        wedgeprops.setdefault('clip_on', False)
-
-        if textprops is None:
-            textprops = {}
-        textprops.setdefault('clip_on', False)
-
-        texts = []
-        slices = []
-        autotexts = []
 
         if centerlabel is None:
             centerlabel = ""
@@ -2938,87 +2895,24 @@ class Axes(_AxesBase):
                               horizontalalignment='center',
                               verticalalignment='center',
                               **textprops)
-
-        i = 0
-        for frac, label, expl in zip(x, labels, explode):
-            x, y = center
-            theta2 = (theta1 + frac) if counterclock else (theta1 - frac)
-            thetam = 2 * np.pi * 0.5 * (theta1 + theta2)
-            x += expl * math.cos(thetam)
-            y += expl * math.sin(thetam)
-
-            w = mpatches.Wedge((x, y), radius, 360. * min(theta1, theta2),
-                               360. * max(theta1, theta2), width=radius/4,
-                               facecolor=get_next_color(),
-                               picker=picker,
-                               **wedgeprops)
-            slices.append(w)
-            self.add_patch(w)
-            w.set_label(label)
-
-            if shadow:
-                # make sure to add a shadow after the call to
-                # add_patch so the figure and transform props will be
-                # set
-                shad = mpatches.Shadow(w, -0.02, -0.02)
-                shad.set_zorder(0.9 * w.get_zorder())
-                shad.set_label('_nolegend_')
-                self.add_patch(shad)
-
-            xt = x + labeldistance * radius * math.cos(thetam)
-            yt = y + labeldistance * radius * math.sin(thetam)
-            label_alignment_h = xt > 0 and 'left' or 'right'
-            label_alignment_v = 'center'
-            label_rotation = 'horizontal'
-            if rotatelabels:
-                label_alignment_v = yt > 0 and 'bottom' or 'top'
-                label_rotation = np.rad2deg(thetam) + (0 if xt > 0 else 180)
-
-            t = self.text(xt, yt, label,
-                          size=rcParams['xtick.labelsize'],
-                          horizontalalignment=label_alignment_h,
-                          verticalalignment=label_alignment_v,
-                          rotation=label_rotation,
-                          **textprops)
-
-            texts.append(t)
-
-            if autopct is not None:
-                xt = x + pctdistance * radius * math.cos(thetam)
-                yt = y + pctdistance * radius * math.sin(thetam)
-                if isinstance(autopct, six.string_types):
-                    s = autopct % (100. * frac)
-                elif callable(autopct):
-                    s = autopct(100. * frac)
-                else:
-                    raise TypeError(
-                        'autopct must be callable or a format string')
-
-                t = self.text(xt, yt, s,
-                              horizontalalignment='center',
-                              verticalalignment='center',
-                              **textprops)
-
-                autotexts.append(t)
-
-            theta1 = theta2
-            i += 1
-
-        if not frame:
-            self.set_frame_on(False)
-
-            self.set_xlim((-1.25 + center[0],
-                           1.25 + center[0]))
-            self.set_ylim((-1.25 + center[1],
-                           1.25 + center[1]))
-            self.set_xticks([])
-            self.set_yticks([])
-
-
+        
         if autopct is None:
-            return slices, texts, centertext
+            slices, texts = self.pie(x, explode, labels, colors,
+            autopct, pctdistance, shadow, labeldistance,
+            startangle, radius, counterclock,
+            wedgeprops, textprops, center,
+            frame, rotatelabels)
+
+            return slices, texts, countertext
+
         else:
-            return slices, texts, centertext, autotexts
+             slices, texts, autotexts = (x, explode, labels, colors,
+            autopct, pctdistance, shadow, labeldistance,
+            startangle, radius, counterclock,
+            wedgeprops, textprops, center,
+            frame, rotatelabels)
+
+            return slices, texts, countertext, autotexts
 
 
     @_preprocess_data(replace_names=["x", "explode", "labels", "colors"],

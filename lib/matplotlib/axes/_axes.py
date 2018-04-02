@@ -2777,7 +2777,7 @@ class Axes(_AxesBase):
 
     @_preprocess_data(replace_names=["x", "explode", "labels", "colors"],
                       label_namer=None)
-    def doughnut(self, x, explode=None, labels=None, colors=None,
+    def doughnut(self, x, width=None,explode=None, labels=None, colors=None,
                  centerlabel=None, autopct=None, pctdistance=0.6,
                  shadow=False, labeldistance=1.1,
             startangle=None, radius=None, counterclock=True,
@@ -2838,6 +2838,10 @@ class Axes(_AxesBase):
         radius : float, optional, default: None
             The radius of the diughnut, if *radius* is *None*
             it will be set to 1.
+        
+        width : float, optional, default: None
+            The radius of the diughnut, if *radius* is *None*
+            it will be set to 0.5 * radius.
 
         counterclock : bool, optional, default: True
             Specify fractions direction, clockwise or counterclockwise.
@@ -2884,28 +2888,31 @@ class Axes(_AxesBase):
         if centerlabel is None:
             centerlabel = ""
         center_x, center_y = center
+        
+        if textprops is None:
+            textprops = {}
+        textprops.setdefault('clip_on', False)
+
         centertext = self.text(center_x, center_y, centerlabel,
                               horizontalalignment='center',
                               verticalalignment='center',
                               **textprops)
         
+        pie = self.pie(x, explode, labels, colors,
+                                            autopct, pctdistance, shadow, labeldistance,
+                                            startangle, radius, counterclock,
+                                            wedgeprops, textprops, center,
+                                            frame, rotatelabels)
+        for each in pie[0]:
+            width = each.get_radius() * 0.5 if width is None else width 
+            each.set_width(width)
+        
         if autopct is None:
-            slices, texts = self.pie(x, explode, labels, colors,
-            autopct, pctdistance, shadow, labeldistance,
-            startangle, radius, counterclock,
-            wedgeprops, textprops, center,
-            frame, rotatelabels)
-
-            return slices, texts, countertext
-
+            slices, texts = pie
+            return slices, texts, centertext
         else:
-             slices, texts, autotexts = (x, explode, labels, colors,
-            autopct, pctdistance, shadow, labeldistance,
-            startangle, radius, counterclock,
-            wedgeprops, textprops, center,
-            frame, rotatelabels)
-
-            return slices, texts, countertext, autotexts
+            slices, texts, autotexts = pie
+            return slices, texts, centertext, autotexts 
 
 
     @_preprocess_data(replace_names=["x", "explode", "labels", "colors"],

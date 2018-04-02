@@ -2670,7 +2670,7 @@ class Axes(_AxesBase):
             textprops = {}
         textprops.setdefault('clip_on', False)
         
-        r_gap =  max(0.01, 0.1 * width) if gap else 0 
+        r_gap =  max(0.01, 0.01 * width) if gap else 0 
         radius = wedge.get_radius() + width+ r_gap
 
         center = wedge.get_center()
@@ -2691,7 +2691,8 @@ class Axes(_AxesBase):
             
             theta2 = (theta1 + delta) if counterclock else (theta1 - delta)
 
-            thetam = np.pi * (theta1 + theta2)
+            thetam = theta1 + (theta2 - theta1 )/ 2 if counterclock  else theta1 - (theta2 - theta1 )/ 2
+           
             w = mpatches.Wedge(center, radius, theta1, theta2,
                                width=width,
                                facecolor=get_next_color(),
@@ -2704,19 +2705,21 @@ class Axes(_AxesBase):
                 # make sure to add a shadow after the call to
                 # add_patch so the figure and transform props will be
                 # set
+                print("asd")
                 shad = mpatches.Shadow(w, -0.02, -0.02)
                 shad.set_zorder(0.9 * w.get_zorder())
                 shad.set_label('_nolegend_')
-                self.add_patch(shad)
-
-            xt = x + labeldistance * radius * math.cos(thetam)
-            yt = y + labeldistance * radius * math.sin(thetam)
+     
+            xt = (x + labeldistance + wedge.get_radius()) * math.cos(math.radians(thetam))
+            yt = (y + labeldistance + wedge.get_radius()) * math.sin(math.radians(thetam))
+            print(x, y, xt,yt)
+            
             label_alignment_h = xt > 0 and 'left' or 'right'
             label_alignment_v = 'center'
             label_rotation = 'horizontal'
             if rotatelabels:
                 label_alignment_v = yt > 0 and 'bottom' or 'top'
-                label_rotation = np.rad2deg(thetam) + (0 if xt > 0 else 180)
+                label_rotation = thetam 
 
             t = self.text(xt, yt, label,
                           size=rcParams['xtick.labelsize'],
@@ -2771,7 +2774,6 @@ class Axes(_AxesBase):
         slices_res = []
         labels_res = []
         for i in range(len(parents)):
-            print(parents[i].get_theta1(), parents[i].get_theta2())
             (slices, all_labels) = self.extend_wedge(parents[i], children_array[i], labels=labels[i]
                                                 , coloropt=coloropt, colors=colors, shadow=shadow,
                                                 width=width, gap=gap, textprops=textprops,
@@ -2781,6 +2783,8 @@ class Axes(_AxesBase):
             labels_res.append(all_labels)
         return slices_res, labels_res
 
+
+    
 
     @_preprocess_data(replace_names=["x", "explode", "labels", "colors"],
                       label_namer=None)

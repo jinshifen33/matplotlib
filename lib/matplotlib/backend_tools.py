@@ -801,6 +801,8 @@ class ToolDataCursor(ToolToggleBase):
 
 
     def onpick(self, event):
+        if (time.time() - self.last_press) < self.press_thresh:
+            return
         self.artist = event.artist
         try:
             xdata, ydata = self.artist.get_data()
@@ -832,6 +834,7 @@ class ToolDataCursor(ToolToggleBase):
             return
         except Exception as e:
             print(e)
+        self.last_press = time.time()
 
     def remove_annotations(self):
         for annotation in self.annotations:
@@ -881,6 +884,7 @@ class ToolDataCursor(ToolToggleBase):
                 x_interp, y_interp = self.iterator.get_interpolation(prev_ind, new_ind, xdata, ydata)
                 self.process_selected(x_interp, y_interp)
                 self.last_direction = inc
+                self.last_press = time.time()
                 return
         except Exception as e:
             print(e)

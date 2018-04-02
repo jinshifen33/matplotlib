@@ -770,7 +770,7 @@ class ToolDataCursor(ToolToggleBase):
     def __init__(self, *args):
         ToolToggleBase.__init__(self, *args)
 
-        self.press_thresh = 0.25
+        self.press_thresh = 0.1
         self.annotations = []
         self.artist = None
         self.iterator = None
@@ -854,13 +854,13 @@ class ToolDataCursor(ToolToggleBase):
             self.process_selected(x_interp, y_interp)
             self.last_direction = inc
             return
-
-        if inc == 1:
-            new_ind = [self.iterator.get_next(xdata)]
         else:
-            new_ind = [self.iterator.get_prev(xdata)]
-        self.process_selected(xdata[new_ind], ydata[new_ind])
-
+            if inc == 1:
+                new_ind = [self.iterator.get_next(xdata)]
+            else:
+                new_ind = [self.iterator.get_prev(xdata)]
+            self.process_selected(xdata[new_ind], ydata[new_ind])
+        self.last_press = time.time()
 
 class DataCursorIterator:
     def __init__(self):

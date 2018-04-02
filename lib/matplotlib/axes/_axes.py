@@ -2577,7 +2577,7 @@ class Axes(_AxesBase):
     
     def extend_wedge(self, wedge, children, labels=None, coloropt=None, colors=None,
                      shadow=False, width=1, gap=0, textprops=None, 
-                     rotatelabels=False, picker=None, labeldistance=0.3,
+                     rotatelabels=False, labeldistance=0.3,
                      counterclock=True): 
         """
         Given a wedge, make a level of hierarchy wedge using children.
@@ -2615,7 +2615,7 @@ class Axes(_AxesBase):
         shadow : bool, optional, default: False
                  Draw a shadow beneath the wedge
 
-        labeldistance : float, optional, default: 0
+        labeldistance : float, optional, default: 0.3
             The radial distance with respect to the inner radius
             of the wedge at which the labels are drawn
 
@@ -2628,15 +2628,12 @@ class Axes(_AxesBase):
         rotatelabels : bool, optional, default: False
             Rotate each label to the angle of the corresponding slice if true.
 
-        picker: optional, default: None
-                see picker arg in artist for detail.
-                This will be passed into children wedge creation
         """
         children = np.array(children, np.float32)
 
         if labels is None:
             labels = [''] * len(children)
-    
+        
         if len(children) != len(labels):
             raise ValueError("'label' must be of length 'x'")
 
@@ -2644,7 +2641,6 @@ class Axes(_AxesBase):
 
             if colors is not None:
                 color_cycle = itertools.cycle(colors)
-
                 def get_next_color():
                     return next(color_cycle)
             else:     
@@ -2669,10 +2665,9 @@ class Axes(_AxesBase):
         radius = wedge.get_radius() + width
         center = wedge.get_center()
 
-        
         texts = []
         slices = []
-        autotexts = []
+
         theta1 = wedge.get_theta1() if counterclock else wedge.get_theta2()
         
         for frac, label in zip(children, labels):
@@ -2680,14 +2675,13 @@ class Axes(_AxesBase):
             (x, y) = center
             theta2 = (theta1 + delta) if counterclock else (theta1 - delta)
             thetam = theta1 + (theta2 - theta1 )/ 2 if counterclock  else theta1 - (theta2 - theta1 )/ 2
-            if(gap):
-                x += 0.05 * math.cos(math.radians(thetam)) 
-                y += 0.05 * math.sin(math.radians(thetam)) 
+            
+            x += gap * math.cos(math.radians(thetam)) 
+            y += gap * math.sin(math.radians(thetam)) 
 
             w = mpatches.Wedge((x,y), radius, theta1, theta2,
                                width=width,
-                               facecolor=get_next_color(),
-                               picker=picker)
+                               facecolor=get_next_color())
             slices.append(w)
             self.add_patch(w)
             w.set_label(label)
@@ -2699,9 +2693,9 @@ class Axes(_AxesBase):
                 shad = mpatches.Shadow(w, -0.02, -0.02)
                 shad.set_zorder(0.9 * w.get_zorder())
                 shad.set_label('_nolegend_')
-            
-            xt = (x + labeldistance + wedge.get_radius()) * math.cos(math.radians(thetam))
-            yt = (y + labeldistance + wedge.get_radius()) * math.sin(math.radians(thetam))
+                self.add_patch(shad)
+            xt = x + (wedge.get_radius() + labeldistance) * math.cos(math.radians(thetam))
+            yt = y + (wedge.get_radius() + labeldistance) * math.sin(math.radians(thetam))
             
             label_alignment_h = xt > 0 and 'left' or 'right'
             label_alignment_v = 'center'
@@ -2726,7 +2720,7 @@ class Axes(_AxesBase):
     def extend_circle_chart(self, parents, children_array, labels=None, 
                             coloropt=None, colors=None, counterclock=True,
                             shadow=False, width=1, gap=0, textprops=None, 
-                     rotatelabels=False, picker=None, labeldistance=0.3):
+                     rotatelabels=False,  labeldistance=0.3):
         """
         Given a pie/doughnut chart reprensentd by *root_patches*.
     
@@ -2765,15 +2759,44 @@ class Axes(_AxesBase):
         for i in range(len(parents)):
             (slices, all_labels) = self.extend_wedge(parents[i], children_array[i], labels=labels[i]
                                                 , coloropt=coloropt, colors=colors, shadow=shadow,
-                                                width=width, gap=gap, textprops=textprops,
-                                                rotatelabels=rotatelabels, picker=picker, 
-                                                labeldistance=labeldistance, counterclock=counterclock)
+                                                width=width, gap=gap, textprops=textprops, 
+                                                rotatelabels=rotatelabels, counterclock=counterclock,
+                                                labeldistance=labeldistance)
             slices_res.append(slices)
             labels_res.append(all_labels)
         return slices_res, labels_res
 
 
-    
+    def sunburst(self, dataset, labels=None, coloropt=None, colors=None,
+                     radius=None,
+                     counterclock=True, shadow=False, width=1, gap=0, textprops=None, 
+                     rotatelabels=False, labeldistance=0.3, center=(0,0)):
+
+
+        
+
+
+
+        parents , texts, centerlabel = self.doughnut(dataset[0], explode=[gap]*len(dataset[0]), radius=radius,center=center,  colors=colors
+                                                     , textprops=textprops,  rotatelabels=rotatelabels,
+                                                     labeldistance=labeldistance, counterclock=counterclock,
+                                                     shadow=shadow)
+         
+
+
+        bunch =[parents]
+        labels_bunch = [texts]
+
+        for i in range(1,len(dataset)):
+            slices, texts = self.extend_circle_chart(parents, dataset[i], width=width, coloropt=coloropt,colors=colors,
+                                                    textprops=textprops, labeldistance=labeldistance,counterclock=counterclock,
+                                                    rotatelabels=rotatelabels, gap=gap)
+            parents = list(itertools.chain.from_iterable(slices))
+
+            bunch.append(parents)
+            labels_bunch.append(list(itertools.chain.from_iterable(texts)))
+        return bunch, labels_bunch, centerlabel
+
 
     @_preprocess_data(replace_names=["x", "explode", "labels", "colors"],
                       label_namer=None)
@@ -2782,7 +2805,7 @@ class Axes(_AxesBase):
                  shadow=False, labeldistance=1.1,
             startangle=None, radius=None, counterclock=True,
             wedgeprops=None, textprops=None, center=(0, 0),
-            frame=False, rotatelabels=False, picker=None):
+            frame=False, rotatelabels=False):
         """
         Plot a doughnut chart.
 
@@ -2898,20 +2921,26 @@ class Axes(_AxesBase):
                               verticalalignment='center',
                               **textprops)
         
-        pie = self.pie(x, explode, labels, colors,
+        result = self.pie(x, explode, labels, colors,
                                             autopct, pctdistance, shadow, labeldistance,
                                             startangle, radius, counterclock,
                                             wedgeprops, textprops, center,
                                             frame, rotatelabels)
-        for each in pie[0]:
-            width = each.get_radius() * 0.5 if width is None else width 
+        if width is None:
+            if radius is None:
+                width = 0.5
+            else:
+                width = radius * 0.5
+        
+        for each in result[0]:
+            width = width
             each.set_width(width)
         
         if autopct is None:
-            slices, texts = pie
+            slices, texts = result
             return slices, texts, centertext
         else:
-            slices, texts, autotexts = pie
+            slices, texts, autotexts = result
             return slices, texts, centertext, autotexts 
 
 

@@ -812,21 +812,24 @@ class ToolDataCursor(ToolToggleBase):
         except Exception as e:
             print(e)
         try:
-            index = 0
             initial_index = 0
-            for container in event.artist.axes.containers:
+            found = False
+            i = 0
+            while (i < len(event.artist.axes.containers) and not found):
                 xdata = []
                 ydata = []
-                for bar in container:
-                    xdata.append(bar.get_x() + bar.get_width()/2)
-                    ydata.append(bar.get_height())
-                    if (bar is event.artist):
+                container = event.artist.axes.containers[i]
+                for j in range(len(container)):
+                    xdata.append(container[j].get_x() + container[j].get_width()/2)
+                    ydata.append(container[j].get_height())
+                    if (container[j] is event.artist):
                         self.artist = container
-                        self.process_selected(xdata[index], ydata[index])
-                        initial_index = index
-                    index += 1
-                xdata = np.array(xdata)
-                ydata = np.array(ydata)
+                        self.process_selected(xdata[j], ydata[j])
+                        initial_index = j
+                        found = True
+                i += 1
+            xdata = np.array(xdata)
+            ydata = np.array(ydata)
             self.iterator = container.create_iterator(xdata, ydata)
             self.iterator.set_ind(initial_index)
             return

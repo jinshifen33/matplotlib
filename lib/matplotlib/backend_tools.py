@@ -827,7 +827,7 @@ class ToolDataCursor(ToolToggleBase):
                     index += 1
                 xdata = np.array(xdata)
                 ydata = np.array(ydata)
-            self.iterator = BarIterator(xdata, ydata)
+            self.iterator = container.create_iterator(xdata, ydata)
             self.iterator.set_ind(initial_index)
             return
         except Exception as e:
@@ -910,22 +910,6 @@ class DataCursorIterator:
 
     def get_prev(self, data):
         pass
-
-class BarIterator(DataCursorIterator):
-
-    def get_next(self):
-        if (self.ind + 1 < len(self.xdata)):
-            self.set_ind(self.ind + 1)
-            return (self.xdata[self.ind], self.ydata[self.ind])
-        else:
-            return (self.xdata[self.ind], self.ydata[self.ind])
-
-    def get_prev(self):
-        if (self.ind - 1 >= 0):
-            self.set_ind(self.ind - 1)
-            return (self.xdata[self.ind], self.ydata[self.ind])
-        else:
-            return (self.xdata[self.ind], self.ydata[self.ind])
 
 
 class ZoomPanBase(ToolToggleBase):

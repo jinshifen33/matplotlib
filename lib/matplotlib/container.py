@@ -5,7 +5,7 @@ import six
 
 import matplotlib.cbook as cbook
 import matplotlib.artist as martist
-
+from .backend_tools import DataCursorIterator
 
 class Container(tuple):
     """
@@ -132,6 +132,28 @@ class BarContainer(Container):
         self.patches = patches
         self.errorbar = errorbar
         Container.__init__(self, patches, **kwargs)
+
+    def create_iterator(self, xdata, ydata):
+        return BarContainerIterator(xdata, ydata)
+
+class BarContainerIterator(DataCursorIterator):
+
+    def __init__(self, xdata, ydata):
+        DataCursorIterator.__init__(self, xdata, ydata)
+
+    def get_next(self):
+        if (self.ind + 1 < len(self.xdata)):
+            self.set_ind(self.ind + 1)
+            return (self.xdata[self.ind], self.ydata[self.ind])
+        else:
+            return (self.xdata[self.ind], self.ydata[self.ind])
+
+    def get_prev(self):
+        if (self.ind - 1 >= 0):
+            self.set_ind(self.ind - 1)
+            return (self.xdata[self.ind], self.ydata[self.ind])
+        else:
+            return (self.xdata[self.ind], self.ydata[self.ind])
 
 
 class ErrorbarContainer(Container):

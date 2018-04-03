@@ -2007,7 +2007,7 @@ class Axes(_AxesBase):
                       )
     @docstring.dedent_interpd
     def bar(self, *args, **kwargs):
-        """
+        r"""
         Make a bar plot.
 
         Call signatures::
@@ -2255,8 +2255,6 @@ class Axes(_AxesBase):
             raise ValueError('invalid alignment: %s' % align)
 
         patches = []
-
-
         args = zip(left, bottom, width, height, color, edgecolor, linewidth)
         for l, b, w, h, c, e, lw in args:
             r = mpatches.Rectangle(
@@ -2265,7 +2263,7 @@ class Axes(_AxesBase):
                 edgecolor=e,
                 linewidth=lw,
                 label='_nolegend_',
-            )
+                )
             r.update(kwargs)
             r.get_path()._interpolation_steps = 100
             if orientation == 'vertical':
@@ -6571,8 +6569,6 @@ class Axes(_AxesBase):
                 _barfunc = self.bar
                 bottom_kwarg = 'bottom'
 
-            print("color")
-            print(color)
             for m, c in zip(tops, color):
                 if bottom is None:
                     bottom = np.zeros(len(m))
@@ -6583,7 +6579,6 @@ class Axes(_AxesBase):
                 patch = _barfunc(bins[:-1]+boffset, height, width,
                                  align='center', log=log,
                                  color=c, **{bottom_kwarg: bottom})
-                print(bins[:-1]+boffset)
                 patches.append(patch)
                 if stacked:
                     bottom[:] = m

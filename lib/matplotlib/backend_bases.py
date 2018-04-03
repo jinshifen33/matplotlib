@@ -2786,7 +2786,6 @@ class NavigationToolbar2(object):
         self.set_history_buttons()
         self._update_view()
 
-
     def draw_rubberband(self, event, x0, y0, x1, y1):
         """Draw a rectangle rubberband to indicate zoom limits.
 

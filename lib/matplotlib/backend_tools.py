@@ -782,8 +782,6 @@ class ToolDataCursor(ToolToggleBase):
         # -1: Left, 1: Right
         self.last_direction = 0
         self.last_press = time.time() - self.press_thresh
-        self.xdata = []
-        self.ydata = []
 
 
     def enable(self, event=None):
@@ -806,9 +804,7 @@ class ToolDataCursor(ToolToggleBase):
         self.artist = event.artist
         try:
             xdata, ydata = self.artist.get_data()
-            self.xdata = xdata
-            self.ydata = ydata
-            self.iterator = self.artist.create_data_cursor_iterator()
+            self.iterator = self.artist.create_data_cursor_iterator(xdata, ydata)
             self.iterator.set_ind(event.ind)
             print('ind-onpick:', self.iterator.get_ind())
             self.process_selected(xdata[self.iterator.get_ind()], ydata[self.iterator.get_ind()])
@@ -816,21 +812,22 @@ class ToolDataCursor(ToolToggleBase):
         except Exception as e:
             print(e)
         try:
-            self.iterator = BarIterator()
             index = 0
             for container in event.artist.axes.containers:
-                self.xdata = []
-                self.ydata = []
+                xdata = []
+                ydata = []
                 for bar in container:
-                    self.xdata.append(bar.get_x() + bar.get_width()/2)
-                    self.ydata.append(bar.get_height())
+                    xdata.append(bar.get_x() + bar.get_width()/2)
+                    ydata.append(bar.get_height())
                     if (bar is event.artist):
                         self.artist = container
-                        self.iterator.set_ind(index)
-                        self.process_selected(self.xdata[index], self.ydata[index])
+                        self.process_selected(xdata[index], ydata[index])
                     index += 1
-                self.xdata = np.array(self.xdata)
-                self.ydata = np.array(self.ydata)
+                xdata = np.array(xdata)
+                ydata = np.array(ydata)
+            self.iterator = BarIterator(xdata, ydata)
+            print(index)
+            self.iterator.set_ind(index)
             return
         except Exception as e:
             print(e)
@@ -863,14 +860,12 @@ class ToolDataCursor(ToolToggleBase):
         else:
             inc = 1
 
-        xdata = self.xdata
-        ydata = self.ydata
-
         # if this is a line, need to interpolate between points
         # for now just looking at a solid line
         try:
             if (not (self.artist.get_linestyle() == "None") and
                     (not self.artist.is_dashed())):
+                xdata, ydata = self.artist.get_data()
                 if self.last_direction != 0 and inc != self.last_direction:
                     # Reverse direction
                     self.iterator.direction_change(xdata, inc)
@@ -890,15 +885,17 @@ class ToolDataCursor(ToolToggleBase):
             print(e)
 
         if inc == 1:
-            new_ind = [self.iterator.get_next(xdata)]
+            (x, y) = self.iterator.get_next()
         else:
-            new_ind = [self.iterator.get_prev(xdata)]
+            (x, y) = self.iterator.get_prev()
 
-        self.process_selected(xdata[new_ind], ydata[new_ind])
+        self.process_selected(x, y)
         self.last_press = time.time()
 
 class DataCursorIterator:
-    def __init__(self):
+    def __init__(self, xdata=[], ydata=[]):
+        self.xdata = xdata
+        self.ydata = ydata
         self.ind = 0
 
     def get_ind(self):
@@ -915,19 +912,19 @@ class DataCursorIterator:
 
 class BarIterator(DataCursorIterator):
 
-    def get_next(self, data):
-        if (self.ind + 1 < len(data)):
+    def get_next(self):
+        if (self.ind + 1 < len(self.xdata)):
             self.set_ind(self.ind + 1)
-            return self.ind
+            return (self.xdata[self.ind], self.ydata[self.ind])
         else:
-            return self.ind
+            return (self.xdata[self.ind], self.ydata[self.ind])
 
-    def get_prev(self, data):
+    def get_prev(self):
         if (self.ind - 1 >= 0):
             self.set_ind(self.ind - 1)
-            return self.ind
+            return (self.xdata[self.ind], self.ydata[self.ind])
         else:
-            return self.ind
+            return (self.xdata[self.ind], self.ydata[self.ind])
 
 
 class ZoomPanBase(ToolToggleBase):

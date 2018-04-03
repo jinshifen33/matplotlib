@@ -489,57 +489,57 @@ class Line2D(Artist):
             return interpolation
 
     class MarkerIterator(DataCursorIterator):
-        def __init__(self):
-            DataCursorIterator.__init__(self)
+        def __init__(self, xdata, ydata):
+            DataCursorIterator.__init__(self, xdata, ydata)
 
-        def get_next(self, data):
+        def get_next(self):
             current = math.inf
             # Holds the currently best index
             current_ind = self.ind
             i = 0
             # Get left-most point that is to the right of current point.
-            for x in data:
-                if current > x > data[self.ind]:
+            for x in self.xdata:
+                if current > x > self.xdata[self.ind]:
                     current = x
                     current_ind = [i]
                 i += 1
             i = 0
             # No point to right. Get left most point.
             if current_ind == self.ind:
-                for x in data:
+                for x in self.xdata:
                     if x < current:
                         current = x
                         current_ind = [i]
                     i += 1
             self.ind = current_ind
-            return self.ind
+            return (self.xdata[self.ind], self.ydata[self.ind])
 
-        def get_prev(self, data):
+        def get_prev(self):
             current = -math.inf
             # Holds the currently best index
             current_ind = self.ind
             i = 0
-            for x in data:
-                if current < x < data[self.ind]:
+            for x in self.xdata:
+                if current < x < self.xdata[self.ind]:
                     current = x
                     current_ind = i
                 i += 1
             i = 0
             # No point to left. Get right most point.
             if current_ind == self.ind:
-                for x in data:
+                for x in self.xdata:
                     if x > current:
                         current = x
                         current_ind = i
                     i += 1
             self.ind = current_ind
-            return self.ind
+            return (self.xdata[self.ind], self.ydata[self.ind])
 
-    def create_data_cursor_iterator(self):
+    def create_data_cursor_iterator(self, xdata, ydata):
         if (not (self.get_linestyle() == "None") and
                 (not self.is_dashed())):
             return self.LineIterator()
-        return self.MarkerIterator()
+        return self.MarkerIterator(xdata, ydata)
 
     def contains(self, mouseevent):
         """

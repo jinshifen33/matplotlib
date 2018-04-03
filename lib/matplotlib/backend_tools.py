@@ -813,6 +813,7 @@ class ToolDataCursor(ToolToggleBase):
             print(e)
         try:
             index = 0
+            initial_index = 0
             for container in event.artist.axes.containers:
                 xdata = []
                 ydata = []
@@ -822,12 +823,12 @@ class ToolDataCursor(ToolToggleBase):
                     if (bar is event.artist):
                         self.artist = container
                         self.process_selected(xdata[index], ydata[index])
+                        initial_index = index
                     index += 1
                 xdata = np.array(xdata)
                 ydata = np.array(ydata)
             self.iterator = BarIterator(xdata, ydata)
-            print(index)
-            self.iterator.set_ind(index)
+            self.iterator.set_ind(initial_index)
             return
         except Exception as e:
             print(e)

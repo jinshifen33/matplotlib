@@ -1,6 +1,5 @@
 from unittest.mock import Mock
 
-import matplotlib.lines as lines
 import matplotlib
 import matplotlib.pyplot as plt
 import time
@@ -31,6 +30,8 @@ def add_bars(ax, xs, ys):
     return bars
 
 def set_up():
+    # need to use a backend that has toolmanager
+    plt.switch_backend('Qt5Agg')
     matplotlib.rcParams['toolbar'] = 'toolmanager'
     fig, ax = plt.subplots(1, 1)
     manager = ToolManager(fig)
@@ -174,21 +175,21 @@ def test_bar():
     do_event(tool, ax, 'onpress', bars[1], 1, xdata=2, ydata=2, key='d')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (2,2))
+    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (2.4,2))
 
     # need to pause since there is a time threshold for events
     time.sleep(0.2)
     do_event(tool, ax, 'onpress', bars[0], 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
+    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1.4,1))
 
     # test moving past endpoint
     time.sleep(0.2)
     do_event(tool, ax, 'onpress', bars[0], 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
+    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1.4,1))
 
     tool.remove_annotations()
     assert len(tool.annotations) == 0

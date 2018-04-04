@@ -2717,7 +2717,7 @@ class Axes(_AxesBase):
 
         return slices, texts
 
-    def extend_circle_chart(self, parents, children_array, labels=None, 
+        def extend_circle_chart(self, parents, children_array, labels=None, 
                             coloropt=None, colors=None, counterclock=True,
                             shadow=False, width=1, gap=0, textprops=None, 
                      rotatelabels=False,  labeldistance=0.3):
@@ -2772,30 +2772,39 @@ class Axes(_AxesBase):
                      counterclock=True, shadow=False, width=1, gap=0, textprops=None, 
                      rotatelabels=False, labeldistance=0.3, center=(0,0)):
 
+        """
+        dataset format 
+        [(percentage, children)]
+        where children is a list of integers or be in this format [(percentage, children)]
+        """
 
-        
 
-
-
-        parents , texts, centerlabel = self.doughnut(dataset[0], explode=[gap]*len(dataset[0]), radius=radius,center=center,  colors=colors
+        parents_size = [ parent for (parent,children) in dataset]
+    
+        parents , texts, centerlabel = self.doughnut(parents_size, radius=radius,center=center,  colors=colors
                                                      , textprops=textprops,  rotatelabels=rotatelabels,
                                                      labeldistance=labeldistance, counterclock=counterclock,
                                                      shadow=shadow)
-         
+        def draw_children(dataset, parents):
+            i = 0
+            for (parent, children) in dataset:
+                flag = False
+                try:
+                    flag = True
+                    sum(children) 
+                    children_sum = children
+                except Exception:
+                    children_sum = [ child for (child,j) in children]
+                
+                children_patchs, child_texts = self.extend_wedge(parents[i], children_sum, gap=gap,coloropt=coloropt,
+                                                                textprops=textprops,  rotatelabels=rotatelabels,
+                                                                labeldistance=labeldistance, counterclock=counterclock,
+                                                                shadow=shadow)
+                if not flag:
+                    draw_children(children, children_patchs)
+                i += 1
 
-
-        bunch =[parents]
-        labels_bunch = [texts]
-
-        for i in range(1,len(dataset)):
-            slices, texts = self.extend_circle_chart(parents, dataset[i], width=width, coloropt=coloropt,colors=colors,
-                                                    textprops=textprops, labeldistance=labeldistance,counterclock=counterclock,
-                                                    rotatelabels=rotatelabels, gap=gap)
-            parents = list(itertools.chain.from_iterable(slices))
-
-            bunch.append(parents)
-            labels_bunch.append(list(itertools.chain.from_iterable(texts)))
-        return bunch, labels_bunch, centerlabel
+        draw_children(dataset, parents)
 
 
     @_preprocess_data(replace_names=["x", "explode", "labels", "colors"],

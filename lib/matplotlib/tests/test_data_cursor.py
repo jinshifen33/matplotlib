@@ -122,8 +122,16 @@ def test_line():
     annotation = tool.annotations[0].get_text().split(',')
     assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
 
+    # test that same result is produced when moving past an endpoint
+    time.sleep(0.2)
+    do_event(tool, ax, 'onpress', line, 0, xdata=1, ydata=1, key='a')
+    assert len(tool.annotations) > 0
+    annotation = tool.annotations[0].get_text().split(',')
+    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
+
     tool.remove_annotations()
     assert len(tool.annotations) == 0
+
 
 def test_scatter():
     fig, ax=set_up()
@@ -145,6 +153,13 @@ def test_scatter():
     annotation = tool.annotations[0].get_text().split(',')
     assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
 
+    # test moving past an endpoint, should be at other endpoint for scatter
+    time.sleep(0.2)
+    do_event(tool, ax, 'onpress', scatter, 0, xdata=1, ydata=1, key='a')
+    assert len(tool.annotations) > 0
+    annotation = tool.annotations[0].get_text().split(',')
+    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (3,3))
+
     tool.remove_annotations()
     assert len(tool.annotations) == 0
 
@@ -162,6 +177,13 @@ def test_bar():
     assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (2,2))
 
     # need to pause since there is a time threshold for events
+    time.sleep(0.2)
+    do_event(tool, ax, 'onpress', bars[0], 0, xdata=1, ydata=1, key='a')
+    assert len(tool.annotations) > 0
+    annotation = tool.annotations[0].get_text().split(',')
+    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
+
+    # test moving past endpoint
     time.sleep(0.2)
     do_event(tool, ax, 'onpress', bars[0], 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0

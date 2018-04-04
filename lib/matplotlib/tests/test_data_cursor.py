@@ -175,21 +175,21 @@ def test_bar():
     do_event(tool, ax, 'onpress', bars[1], 1, xdata=2, ydata=2, key='d')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (2.4,2))
+    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (2,2))
 
     # need to pause since there is a time threshold for events
     time.sleep(0.2)
     do_event(tool, ax, 'onpress', bars[0], 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1.4,1))
+    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
 
     # test moving past endpoint
     time.sleep(0.2)
     do_event(tool, ax, 'onpress', bars[0], 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1.4,1))
+    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
 
     tool.remove_annotations()
     assert len(tool.annotations) == 0

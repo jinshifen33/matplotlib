@@ -513,7 +513,6 @@ class Line2D(Artist):
             y_pts = np.array([ydata[prev_ind], ydata[new_ind]])
             y_pts = cbook.simple_linear_interpolation(y_pts, self.steps)
             interpolation = x_pts[self.interp_ind], y_pts[self.interp_ind]
-            print(self.ind, self.interp_ind)
             return interpolation
 
     class MarkerIterator(DataCursorIterator):

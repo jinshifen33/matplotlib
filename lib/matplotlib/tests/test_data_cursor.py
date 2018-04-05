@@ -27,7 +27,7 @@ def add_scatter(ax, xs, ys):
     return scatter
 
 def add_bars(ax, xs, ys):
-    bars = ax.bar(xs, ys, picker=5)
+    bars = ax.bar(xs, ys, align='center', picker=5)
     ax.figure.canvas.draw()
     return bars
 
@@ -186,3 +186,4 @@ def test_bar():
 
     tool.remove_annotations()
     assert len(tool.annotations) == 0
+

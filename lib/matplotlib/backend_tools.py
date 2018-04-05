@@ -776,7 +776,7 @@ class ToolDataCursor(ToolToggleBase):
         self.iterator = None
         self.on_press_id = None
         self.on_pick_id = None
-
+        self.last_press = time.time() - self.press_thresh
 
     def enable(self, event=None):
         self.on_press_id = self.figure.canvas.mpl_connect('key_press_event', self.onpress)

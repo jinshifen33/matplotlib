@@ -4532,6 +4532,47 @@ def test_text_labelsize():
     ax.tick_params(labelsize='large')
     ax.tick_params(direction='out')
 
+@image_comparison(baseline_images=['basic_doughnut'], extensions=['png'])
+def test_basic_doughnut():
+    # Data to plot
+    labels = 'Python', 'C++', 'Ruby', 'Java'
+    sizes = [215, 130, 245, 210]
+    colors = ['gold', 'yellowgreen', 'lightcoral', 'lightskyblue']
+     
+    # Plot
+    plt.doughnut(sizes, labels=labels, colors=colors,
+            autopct='%1.1f%%', shadow=True, startangle=140, centerlabel="Hello")
+    plt.axis('equal') 
+
+
+@image_comparison(baseline_images=['doughnut_rotate_labels'],
+                  extensions=['png'])
+def test_doughnut_rotate_labels():
+    # Data to plot
+    labels = 'Python', 'C++', 'Ruby', 'Java'
+    sizes = [215, 130, 245, 210]
+    colors = ['gold', 'yellowgreen', 'lightcoral', 'lightskyblue']
+     
+    # Plot
+    plt.doughnut(sizes, labels=labels, colors=colors,
+            autopct='%1.1f%%', shadow=True, startangle=140,
+            rotatelabels=True, centerlabel="Hello")
+    plt.axis('equal')
+    
+@image_comparison(baseline_images=['doughnut_ccw'], extensions=['png'])
+def test_doughnut_ccw():
+    # The slices will be ordered and plotted counter-clockwise.
+    labels = 'Frogs', 'Hogs', 'Dogs', 'Logs'
+    sizes = [15, 30, 45, 10]
+    colors = ['yellowgreen', 'gold', 'lightskyblue', 'lightcoral']
+    explode = (0, 0.1, 0, 0)  # only "explode" the 2nd slice (i.e. 'Hogs')
+
+    plt.doughnut(sizes, explode=explode, labels=labels, colors=colors,
+            autopct='%1.1f%%', shadow=True, startangle=90, centerlabel="Hello",
+            counterclock=True)
+    # Set aspect ratio to be equal so that pie is drawn as a circle.
+    plt.axis('equal')
+    
 
 @image_comparison(baseline_images=['pie_linewidth_0', 'pie_linewidth_0',
                                    'pie_linewidth_0'],

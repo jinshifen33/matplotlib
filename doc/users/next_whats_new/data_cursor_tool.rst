@@ -15,4 +15,4 @@ To add it to the toolbar inside the group 'foo'
  >>> fig.canvas.manager.toolbar.add_tool('DataCursor', 'foo')
 
 An example of this feature is provided at
-`~matplotlib/examples/user_interfaces/data_cursor_demo.py`
+`~matplotlib/examples/tools/data_cursor_demo.py`

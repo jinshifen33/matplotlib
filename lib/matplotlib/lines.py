@@ -431,37 +431,39 @@ class Line2D(Artist):
         self.set_data(xdata, ydata)
 
     class LineIterator(DataCursorIterator):
-        def __init__(self):
-            DataCursorIterator.__init__(self)
+        def __init__(self, xdata, ydata, steps=20):
+            DataCursorIterator.__init__(self, xdata, ydata)
             self.interp_ind = 0
-            self.steps = 20
+            self.steps = steps
 
-        def direction_change(self, data, inc):
-            # When switching directions, we have to make sure the new interpolation
-            # interval is correct. On a standard interval (one with another interval
-            # to left and right), we shift opposite to the new direction. This will
-            # give us our old interval in the opposite direction. We then modify the
-            # interp_ind to get our old point again. Edge cases include intervals with
-            # no interval to the left and right. In this case, we don't shift and we
-            # have no need to modify the interp_id.
-            if not ((inc == 1 and self.ind == 0) or
-                    (inc == -1 and self.ind == (len(data) - 1))):
-                self.ind = self.ind - inc
-                self.interp_ind = self.steps - self.interp_ind
+        def get_next(self):
+            if self.ind == len(self.xdata) - 1:
+                return self.get_interpolation()
+            if self.interp_ind == self.steps - 1:
+                if self.ind < len(self.xdata) - 1:
+                    self.interp_ind = 0
+                    self.ind += 1
+            else:
+                self.interp_ind = (self.interp_ind + 1) % (self.steps + 1)
+            return self.get_interpolation()
 
-        def get_next(self, data):
-            self.interp_ind = (self.interp_ind + 1) % (self.steps + 1)
-            if self.ind != len(data) - 1:
-                return (self.ind + 1) % len(data), self.interp_ind
-            return self.ind, self.interp_ind
+        def get_prev(self):
+            if self.ind == 0 and self.interp_ind == 0:
+                return self.get_interpolation()
+            if self.interp_ind == 0:
+                if self.ind > 0:
+                    self.interp_ind = self.steps - 1
+                    self.ind -= 1
+            else:
+                self.interp_ind = (self.interp_ind - 1) % (self.steps + 1)
+            return self.get_interpolation()
 
-        def get_prev(self, data):
-            self.interp_ind = (self.interp_ind + 1) % (self.steps + 1)
-            if self.ind != 0:
-                return (self.ind - 1) % len(data), self.interp_ind
-            return self.ind, self.interp_ind
+        def get_right_of(self):
+            if self.ind == len(self.xdata) - 1:
+                return self.ind
+            return self.ind + 1
 
-        def get_interpolation(self, prev_ind, new_ind, xdata, ydata):
+        def get_interpolation(self):
             """
             Resamples xdata and ydata from (prev_ind, new_ind) to have
             ``steps - 1`` points in between them and then retrieves
@@ -469,23 +471,22 @@ class Line2D(Artist):
 
             Parameters
             ----------
-            prev_ind : int
-            new_ind: int
-            xdata: array
-            ydata: array
 
             Returns
             -------
             A tuple containing the x and y of the point.
             """
+            prev_ind = self.ind
+            new_ind = self.get_right_of()
+            xdata = self.xdata
+            ydata = self.ydata
+
             x_pts = np.array([xdata[prev_ind], xdata[new_ind]])
             x_pts = cbook.simple_linear_interpolation(x_pts, self.steps)
             y_pts = np.array([ydata[prev_ind], ydata[new_ind]])
             y_pts = cbook.simple_linear_interpolation(y_pts, self.steps)
             interpolation = x_pts[self.interp_ind], y_pts[self.interp_ind]
-            if x_pts[self.interp_ind] == xdata[[new_ind]]:
-                self.interp_ind = 0
-                self.ind = new_ind
+            print(self.ind, self.interp_ind)
             return interpolation
 
     class MarkerIterator(DataCursorIterator):
@@ -538,7 +539,7 @@ class Line2D(Artist):
     def create_data_cursor_iterator(self, xdata, ydata):
         if (not (self.get_linestyle() == "None") and
                 (not self.is_dashed())):
-            return self.LineIterator()
+            return self.LineIterator(xdata, ydata)
         return self.MarkerIterator(xdata, ydata)
 
     def contains(self, mouseevent):

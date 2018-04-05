@@ -864,30 +864,6 @@ class ToolDataCursor(ToolToggleBase):
         else:
             inc = 1
 
-        # if this is a line, need to interpolate between points
-        # for now just looking at a solid line
-        try:
-            if (not (self.artist.get_linestyle() == "None") and
-                    (not self.artist.is_dashed())):
-                xdata, ydata = self.artist.get_data()
-                if self.last_direction != 0 and inc != self.last_direction:
-                    # Reverse direction
-                    self.iterator.direction_change(xdata, inc)
-
-                prev_ind = self.iterator.get_ind()
-                if inc == 1:
-                    new_ind, interp_ind = self.iterator.get_next(xdata)
-                else:
-                    new_ind, interp_ind = self.iterator.get_prev(xdata)
-
-                x_interp, y_interp = self.iterator.get_interpolation(prev_ind, new_ind, xdata, ydata)
-                self.process_selected(x_interp, y_interp)
-                self.last_direction = inc
-                self.last_press = time.time()
-                return
-        except Exception as e:
-            print(e)
-
         if inc == 1:
             (x, y) = self.iterator.get_next()
         else:

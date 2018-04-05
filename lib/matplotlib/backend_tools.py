@@ -776,12 +776,6 @@ class ToolDataCursor(ToolToggleBase):
         self.iterator = None
         self.on_press_id = None
         self.on_pick_id = None
-        # Index in the interpolation interval.
-        self.interp_ind = 0
-        # Direction of last traversal
-        # -1: Left, 1: Right
-        self.last_direction = 0
-        self.last_press = time.time() - self.press_thresh
 
 
     def enable(self, event=None):
@@ -793,9 +787,6 @@ class ToolDataCursor(ToolToggleBase):
         self.canvas.draw_idle()
         self.canvas.mpl_disconnect(self.on_pick_id)
         self.canvas.mpl_disconnect(self.on_press_id)
-        # Reset
-        self.interp_ind = 0
-        self.last_direction = 0
 
 
     def onpick(self, event):

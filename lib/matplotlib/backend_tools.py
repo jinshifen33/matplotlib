@@ -769,7 +769,6 @@ class ToolDataCursor(ToolToggleBase):
 
     def __init__(self, *args):
         ToolToggleBase.__init__(self, *args)
-
         self.press_thresh = 0.1
         self.annotations = []
         self.artist = None
@@ -788,7 +787,6 @@ class ToolDataCursor(ToolToggleBase):
         self.canvas.mpl_disconnect(self.on_pick_id)
         self.canvas.mpl_disconnect(self.on_press_id)
 
-
     def onpick(self, event):
         if (time.time() - self.last_press) < self.press_thresh:
             return
@@ -796,8 +794,7 @@ class ToolDataCursor(ToolToggleBase):
         xdata, ydata, index = self.get_data_cursor_data(event)
         self.iterator = self.artist.create_data_cursor_iterator(xdata, ydata)
         self.iterator.set_ind(index)
-        print('ind-onpick:', self.iterator.get_ind())
-        self.process_selected(xdata[self.iterator.get_ind()], ydata[self.iterator.get_ind()])
+        self.process_selected(xdata[index], ydata[index])
         self.last_press = time.time()
 
     def get_data_cursor_data(self, event):
@@ -827,7 +824,7 @@ class ToolDataCursor(ToolToggleBase):
             ydata = np.array(ydata)
             return xdata, ydata, initial_index
         except AttributeError:
-            print('Artist not supported by data cursor: %s' % event.artist)
+            warnings.warn('The selected artist is not supported by ToolDataCursor: %s' % event.artist)
 
     def remove_annotations(self):
         for annotation in self.annotations:
@@ -835,7 +832,6 @@ class ToolDataCursor(ToolToggleBase):
         self.annotations[:] = []
 
     def process_selected(self, xs, ys):
-        print("xs:", xs, "ys:", ys)
         self.remove_annotations()
         for axes in self.figure.get_axes():
             self.annotations.append(axes.annotate("%.5f, %.5f" % (xs, ys), xy=(xs, ys),
@@ -851,6 +847,7 @@ class ToolDataCursor(ToolToggleBase):
             return
         if event.key not in ('a', 'd'):
             return
+
         if event.key == 'a':
             inc = -1
         else:

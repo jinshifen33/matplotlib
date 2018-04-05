@@ -134,6 +134,9 @@ class BarContainer(Container):
         Container.__init__(self, patches, **kwargs)
 
     def create_data_cursor_iterator(self, xdata, ydata):
+        """
+        Returns a new DataCursorIterator for the current BarContainer.
+		"""
         return BarContainerIterator(xdata, ydata)
 
 class BarContainerIterator(DataCursorIterator):

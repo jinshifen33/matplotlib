@@ -904,6 +904,7 @@ class DataCursorIterator:
         self.ind = ind
 
     def get_next(self):
+		
         pass
 
     def get_prev(self):

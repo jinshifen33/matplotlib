@@ -431,12 +431,25 @@ class Line2D(Artist):
         self.set_data(xdata, ydata)
 
     class LineIterator(DataCursorIterator):
+        """
+		DataCursorIterator for lines.
+		"""
+
         def __init__(self, xdata, ydata, steps=20):
             DataCursorIterator.__init__(self, xdata, ydata)
             self.interp_ind = 0
             self.steps = steps
 
         def get_next(self):
+            """
+            Gets next point on line for ToolDataCursor.
+
+            Returns
+            -------
+            A tuple (xs, ys) where xs is an array that contains the x
+            co-ordinate to place the new annotation and ys is an array that
+            contains the y to place the new annotation.
+            """
             if self.ind == len(self.xdata) - 1:
                 return self.get_interpolation()
             if self.interp_ind == self.steps - 1:
@@ -448,6 +461,15 @@ class Line2D(Artist):
             return self.get_interpolation()
 
         def get_prev(self):
+		    """
+            Gets next point on line for ToolDataCursor.
+
+            Returns
+            -------
+            A tuple (xs, ys) where xs is an array that contains the x
+            co-ordinate to place the new annotation and ys is an array that
+            contains the y to place the new annotation.
+            """
             if self.ind == 0 and self.interp_ind == 0:
                 return self.get_interpolation()
             if self.interp_ind == 0:
@@ -459,6 +481,11 @@ class Line2D(Artist):
             return self.get_interpolation()
 
         def get_right_of(self):
+            """
+            Returns index to the right of the current index.
+            If there is no index to the right, this function returns the
+            current index.
+			"""
             if self.ind == len(self.xdata) - 1:
                 return self.ind
             return self.ind + 1
@@ -490,10 +517,25 @@ class Line2D(Artist):
             return interpolation
 
     class MarkerIterator(DataCursorIterator):
+        """
+		DataCursorIterator for markers.
+		"""
+
         def __init__(self, xdata, ydata):
             DataCursorIterator.__init__(self, xdata, ydata)
 
         def get_next(self):
+            """
+            Gets next marker for ToolDataCursor. The marker it returns is
+            the smallest marker that has a larger x value of the currently
+            selected marker.
+
+            Returns
+            -------
+            A tuple (xs, ys) where xs is an array that contains the x
+            co-ordinate to place the new annotation and ys is an array that
+            contains the y to place the new annotation.
+            """
             current = math.inf
             # Holds the currently best index
             current_ind = self.ind
@@ -516,6 +558,17 @@ class Line2D(Artist):
             return (self.xdata[self.ind], self.ydata[self.ind])
 
         def get_prev(self):
+            """
+            Gets previous marker for ToolDataCursor. The marker it returns is
+            the largest marker that has a smaller x value of the currently
+            selected marker.
+
+            Returns
+            -------
+            A tuple (xs, ys) where xs is an array that contains the x
+            co-ordinate to place the new annotation and ys is an array that
+            contains the y to place the new annotation.
+            """
             current = -math.inf
             # Holds the currently best index
             current_ind = self.ind
@@ -537,6 +590,9 @@ class Line2D(Artist):
             return (self.xdata[self.ind], self.ydata[self.ind])
 
     def create_data_cursor_iterator(self, xdata, ydata):
+        """
+        Returns a new DataCursorIterator for the current Line2D.
+        """
         if (not (self.get_linestyle() == "None") and
                 (not self.is_dashed())):
             return self.LineIterator(xdata, ydata)

@@ -148,7 +148,7 @@ class BarContainerIterator(DataCursorIterator):
         DataCursorIterator.__init__(self, xdata, ydata)
 
     def get_next(self):
-	    """
+        """
         Gets next bar for ToolDataCursor.
 
         Returns

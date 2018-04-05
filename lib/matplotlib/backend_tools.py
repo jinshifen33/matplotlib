@@ -848,14 +848,14 @@ class ToolDataCursor(ToolToggleBase):
         self.annotations[:] = []
 
     def process_selected(self, xs, ys):
-		"""
-	    Draws an annotation at the selected location.
+        """
+        Draws an annotation at the selected location.
 
-	    Parameters
-	    ----------
-	    xs: array that contains the x value
-	    ys: array that contains the y value
-	    """
+        Parameters
+        ----------
+        xs: array that contains the x value
+        ys: array that contains the y value
+        """
         self.remove_annotations()
         for axes in self.figure.get_axes():
             self.annotations.append(axes.annotate("%.5f, %.5f" % (xs, ys), xy=(xs, ys),

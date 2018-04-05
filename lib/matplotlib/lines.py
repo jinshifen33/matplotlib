@@ -432,8 +432,8 @@ class Line2D(Artist):
 
     class LineIterator(DataCursorIterator):
         """
-		DataCursorIterator for lines.
-		"""
+        DataCursorIterator for lines.
+        """
 
         def __init__(self, xdata, ydata, steps=20):
             DataCursorIterator.__init__(self, xdata, ydata)
@@ -461,7 +461,7 @@ class Line2D(Artist):
             return self.get_interpolation()
 
         def get_prev(self):
-		    """
+            """
             Gets next point on line for ToolDataCursor.
 
             Returns
@@ -485,7 +485,7 @@ class Line2D(Artist):
             Returns index to the right of the current index.
             If there is no index to the right, this function returns the
             current index.
-			"""
+            """
             if self.ind == len(self.xdata) - 1:
                 return self.ind
             return self.ind + 1
@@ -518,8 +518,8 @@ class Line2D(Artist):
 
     class MarkerIterator(DataCursorIterator):
         """
-		DataCursorIterator for markers.
-		"""
+        DataCursorIterator for markers.
+        """
 
         def __init__(self, xdata, ydata):
             DataCursorIterator.__init__(self, xdata, ydata)
@@ -558,7 +558,7 @@ class Line2D(Artist):
             return (self.xdata[self.ind], self.ydata[self.ind])
 
         def get_prev(self):
-            """
+           """
             Gets previous marker for ToolDataCursor. The marker it returns is
             the largest marker that has a smaller x value of the currently
             selected marker.

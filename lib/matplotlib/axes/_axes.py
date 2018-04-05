@@ -2831,15 +2831,17 @@ class Axes(_AxesBase):
 
         children = []
         data = []
-        try:
-            sum(x)
-            data = x
-        except Exception:
+        
+
+        if isinstance(x[0], tuple):
             data = []
             children = []
             for (size, child) in x:
                 data.append(size)
                 children.append(child)
+        else:
+            data = x
+
 
         result = self._extend_on_wedge(data, explode=explode, width=width, labels=labels, colors=colors,
                                         autopct=autopct, pctdistance=pctdistance,

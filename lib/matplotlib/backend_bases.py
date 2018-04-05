@@ -3179,6 +3179,7 @@ class NavigationToolbar2(object):
     def set_history_buttons(self):
         """Enable or disable the back/forward button."""
 
+
 class ToolContainerBase(object):
     """
     Base class for all tool containers, e.g. toolbars.

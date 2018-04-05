@@ -796,14 +796,12 @@ class NavigationToolbar2QT(NavigationToolbar2, QtWidgets.QToolBar):
 
     def _update_buttons_checked(self):
         # sync button checkstates to match active mode
-        print("backend")
-        print(self._active)
         self._actions['pan'].setChecked(self._active == 'PAN')
         self._actions['zoom'].setChecked(self._active == 'ZOOM')
 
     def pan(self, *args):
         super().pan(*args)
-        sennnlf._update_buttons_checked()
+        self._update_buttons_checked()
 
     def zoom(self, *args):
         super().zoom(*args)

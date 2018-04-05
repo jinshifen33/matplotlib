@@ -502,7 +502,7 @@ class Line2D(Artist):
             for x in self.xdata:
                 if current > x > self.xdata[self.ind]:
                     current = x
-                    current_ind = [i]
+                    current_ind = i
                 i += 1
             i = 0
             # No point to right. Get left most point.
@@ -510,7 +510,7 @@ class Line2D(Artist):
                 for x in self.xdata:
                     if x < current:
                         current = x
-                        current_ind = [i]
+                        current_ind = i
                     i += 1
             self.ind = current_ind
             return (self.xdata[self.ind], self.ydata[self.ind])

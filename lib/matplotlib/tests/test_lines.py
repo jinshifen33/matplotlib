@@ -197,3 +197,36 @@ def test_nan_is_sorted():
     assert line._is_sorted(np.array([1, 2, 3]))
     assert line._is_sorted(np.array([1, np.nan, 3]))
     assert not line._is_sorted([3, 5] + [np.nan] * 100 + [0, 2])
+
+
+def test_marker_iterator():
+    fig, ax = plt.subplots()
+    markers, = ax.plot([2, 3, 4], [5, 7, 8], 'bs')
+    iter = markers.create_data_cursor_iterator(np.array([2, 3, 4]), np.array([5, 7, 8]))
+
+    assert iter.get_ind() == 0
+
+    # test get_next method
+    assert iter.get_next() == (3, 7)
+    assert iter.get_ind() == 1
+    assert iter.get_next() == (4, 8)
+    assert iter.get_ind() == 2
+
+    # get_next should wrap around at the end
+    assert iter.get_next() == (2, 5)
+    assert iter.get_ind() == 0
+
+    # test get_prev method
+    # should wrap around
+    assert iter.get_prev() == (4, 8)
+    assert iter.get_ind() == 2
+
+    assert iter.get_prev() == (3, 7)
+    assert iter.get_ind() == 1
+
+    assert iter.get_prev() == (2, 5)
+    assert iter.get_ind() == 0
+
+    # test the set method
+    iter.set_ind(1)
+    assert iter.get_ind() == 1

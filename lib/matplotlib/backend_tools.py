@@ -798,6 +798,19 @@ class ToolDataCursor(ToolToggleBase):
         self.last_press = time.time()
 
     def get_data_cursor_data(self, event):
+		"""
+		Given a pick event, this function tries to get the xdata and ydata
+		for the artist that is being picked. If the artist is not supported,
+		the function emits a warning.
+		
+		Parameters
+		----------
+		event: (event) The pick event
+		
+		Returns
+		-------
+		A tuple that contains the xdata, ydata and index to start on.
+		"""
         try:
             xdata, ydata = self.artist.get_data()
             return xdata, ydata, event.ind
@@ -827,11 +840,22 @@ class ToolDataCursor(ToolToggleBase):
             warnings.warn('The selected artist is not supported by ToolDataCursor: %s' % event.artist)
 
     def remove_annotations(self):
+		"""
+		Clears the annotations for this ToolDataCursor.
+		"""
         for annotation in self.annotations:
             annotation.remove()
         self.annotations[:] = []
 
     def process_selected(self, xs, ys):
+		"""
+		Draws an annotation at the selected location.
+		
+		Parameters
+		----------
+		xs: array that contains the x value
+		ys: array that contains the y value
+		"""
         self.remove_annotations()
         for axes in self.figure.get_axes():
             self.annotations.append(axes.annotate("%.5f, %.5f" % (xs, ys), xy=(xs, ys),
@@ -862,6 +886,12 @@ class ToolDataCursor(ToolToggleBase):
         self.last_press = time.time()
 
 class DataCursorIterator:
+	"""
+	Iterator for ToolDataCursor.
+	Subclasses of DataCursorIterator define how iterating backwards and
+	forward is implemented by overriding get_next() and get_prev().
+	"""
+
     def __init__(self, xdata=[], ydata=[]):
         self.xdata = xdata
         self.ydata = ydata
@@ -873,10 +903,10 @@ class DataCursorIterator:
     def set_ind(self, ind):
         self.ind = ind
 
-    def get_next(self, data):
+    def get_next(self):
         pass
 
-    def get_prev(self, data):
+    def get_prev(self):
         pass
 
 

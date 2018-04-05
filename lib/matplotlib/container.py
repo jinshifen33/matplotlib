@@ -137,23 +137,40 @@ class BarContainer(Container):
         return BarContainerIterator(xdata, ydata)
 
 class BarContainerIterator(DataCursorIterator):
+	"""
+	DataCursorIterator for BarContainer.
+	"""
 
     def __init__(self, xdata, ydata):
         DataCursorIterator.__init__(self, xdata, ydata)
 
     def get_next(self):
+		"""
+		Gets next bar for ToolDataCursor.
+		
+		Returns
+		-------
+		A tuple (xs, ys) where xs is an array that contains the x
+		co-ordinate to place the new annotation and ys is an array that
+		contains the y to place the new annotation.
+		"""
         if (self.ind + 1 < len(self.xdata)):
             self.set_ind(self.ind + 1)
-            return (self.xdata[self.ind], self.ydata[self.ind])
-        else:
-            return (self.xdata[self.ind], self.ydata[self.ind])
+        return (self.xdata[self.ind], self.ydata[self.ind])
 
     def get_prev(self):
+		"""
+		Gets previous bar for ToolDataCursor.
+		
+		Returns
+		-------
+		A tuple (xs, ys) where xs is an array that contains the x
+		co-ordinate to place the new annotation and ys is an array that
+		contains the y to place the new annotation.
+		"""
         if (self.ind - 1 >= 0):
             self.set_ind(self.ind - 1)
-            return (self.xdata[self.ind], self.ydata[self.ind])
-        else:
-            return (self.xdata[self.ind], self.ydata[self.ind])
+        return (self.xdata[self.ind], self.ydata[self.ind])
 
 
 class ErrorbarContainer(Container):

@@ -558,7 +558,7 @@ class Line2D(Artist):
             return (self.xdata[self.ind], self.ydata[self.ind])
 
         def get_prev(self):
-           """
+            """
             Gets previous marker for ToolDataCursor. The marker it returns is
             the largest marker that has a smaller x value of the currently
             selected marker.

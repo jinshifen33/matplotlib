@@ -820,14 +820,14 @@ class ToolDataCursor(ToolToggleBase):
             initial_index = 0
             found = False
             i = 0
-            while (i < len(event.artist.axes.containers) and not found):
+            while i < len(event.artist.axes.containers) and not found:
                 xdata = []
                 ydata = []
                 container = event.artist.axes.containers[i]
                 for j in range(len(container)):
                     xdata.append(container[j].get_x() + container[j].get_width() / 2)
                     ydata.append(container[j].get_height())
-                    if (container[j] is event.artist):
+                    if container[j] is event.artist:
                         self.artist = container
                         initial_index = j
                         found = True

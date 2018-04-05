@@ -11,6 +11,8 @@ from numpy.testing import assert_allclose
 
 import pytest
 
+DELAY = 0.5
+
 def get_tool(fig):
     return fig.canvas.manager.toolmanager.tools['data-cursor']
 
@@ -41,7 +43,7 @@ def set_up():
     return (fig, ax)
 
 
-def do_event(tool, ax, etype, artist, index, button=1, xdata=0, ydata=0, key=None, step=1):
+def do_event(tool, ax, etype, artist, index, button=1, xdata=0, ydata=0, key=None, step=1, delay=DELAY):
     """
     *tool*
         the tool instance handling the event
@@ -84,6 +86,9 @@ def do_event(tool, ax, etype, artist, index, button=1, xdata=0, ydata=0, key=Non
         the key depressed when the mouse event triggered (see
         :class:`KeyEvent`)
     """
+    # Need to add delay due to time threshold for events
+    time.sleep(delay)
+
     event = Mock()
     event.button = button
     event.artist = artist
@@ -116,15 +121,11 @@ def test_line():
     annotation = tool.annotations[0].get_text().split(',')
     assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1.05,1.05))
 
-    # need to pause since there is a time threshold for events
-    time.sleep(0.2)
     do_event(tool, ax, 'onpress', line, 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
     assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
 
-    # test that same result is produced when moving past an endpoint
-    time.sleep(0.2)
     do_event(tool, ax, 'onpress', line, 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
@@ -147,15 +148,11 @@ def test_scatter():
     annotation = tool.annotations[0].get_text().split(',')
     assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (2,2))
 
-    # need to pause since there is a time threshold for events
-    time.sleep(0.2)
     do_event(tool, ax, 'onpress', scatter, 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
     assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
 
-    # test moving past an endpoint, should be at other endpoint for scatter
-    time.sleep(0.2)
     do_event(tool, ax, 'onpress', scatter, 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
@@ -177,15 +174,11 @@ def test_bar():
     annotation = tool.annotations[0].get_text().split(',')
     assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (2,2))
 
-    # need to pause since there is a time threshold for events
-    time.sleep(0.2)
     do_event(tool, ax, 'onpress', bars[0], 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
     assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
 
-    # test moving past endpoint
-    time.sleep(0.2)
     do_event(tool, ax, 'onpress', bars[0], 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')

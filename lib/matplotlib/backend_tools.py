@@ -802,15 +802,20 @@ class ToolDataCursor(ToolToggleBase):
         if (time.time() - self.last_press) < self.press_thresh:
             return
         self.artist = event.artist
+        xdata, ydata, index = self.get_data_cursor_data(event)
+        self.iterator = self.artist.create_data_cursor_iterator(xdata, ydata)
+        self.iterator.set_ind(index)
+        print('ind-onpick:', self.iterator.get_ind())
+        self.process_selected(xdata[self.iterator.get_ind()], ydata[self.iterator.get_ind()])
+        self.last_press = time.time()
+
+    def get_data_cursor_data(self, event):
         try:
             xdata, ydata = self.artist.get_data()
-            self.iterator = self.artist.create_data_cursor_iterator(xdata, ydata)
-            self.iterator.set_ind(event.ind)
-            print('ind-onpick:', self.iterator.get_ind())
-            self.process_selected(xdata[self.iterator.get_ind()], ydata[self.iterator.get_ind()])
-            return
-        except Exception as e:
-            print(e)
+            return xdata, ydata, event.ind
+        except AttributeError:
+            pass
+
         try:
             initial_index = 0
             found = False
@@ -820,22 +825,18 @@ class ToolDataCursor(ToolToggleBase):
                 ydata = []
                 container = event.artist.axes.containers[i]
                 for j in range(len(container)):
-                    xdata.append(container[j].get_x() + container[j].get_width()/2)
+                    xdata.append(container[j].get_x() + container[j].get_width() / 2)
                     ydata.append(container[j].get_height())
                     if (container[j] is event.artist):
                         self.artist = container
-                        self.process_selected(xdata[j], ydata[j])
                         initial_index = j
                         found = True
                 i += 1
             xdata = np.array(xdata)
             ydata = np.array(ydata)
-            self.iterator = container.create_iterator(xdata, ydata)
-            self.iterator.set_ind(initial_index)
-            return
-        except Exception as e:
-            print(e)
-        self.last_press = time.time()
+            return xdata, ydata, initial_index
+        except AttributeError:
+            print('Artist not supported by data cursor: %s' % event.artist)
 
     def remove_annotations(self):
         for annotation in self.annotations:

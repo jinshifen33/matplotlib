@@ -133,7 +133,7 @@ class BarContainer(Container):
         self.errorbar = errorbar
         Container.__init__(self, patches, **kwargs)
 
-    def create_iterator(self, xdata, ydata):
+    def create_data_cursor_iterator(self, xdata, ydata):
         return BarContainerIterator(xdata, ydata)
 
 class BarContainerIterator(DataCursorIterator):

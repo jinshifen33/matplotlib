@@ -4532,17 +4532,62 @@ def test_text_labelsize():
     ax.tick_params(labelsize='large')
     ax.tick_params(direction='out')
 
-@image_comparison(baseline_images=['basic_doughnut'], extensions=['png'])
-def test_basic_doughnut():
-    # Data to plot
-    labels = 'Python', 'C++', 'Ruby', 'Java'
-    sizes = [215, 130, 245, 210]
-    colors = ['gold', 'yellowgreen', 'lightcoral', 'lightskyblue']
-     
-    # Plot
-    plt.doughnut(sizes, labels=labels, colors=colors,
-            autopct='%1.1f%%', shadow=True, startangle=140, centerlabel="Hello")
-    plt.axis('equal') 
+@image_comparison(baseline_images=['basic_sunburst'], extensions=['png'])
+def test_basic_sunburst():
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    
+    sa = [(180,
+           [(40,[10,10,40,20]),(40,[10,30,40,20])
+           ,(40,[10,30,40,20]),(60,[10,30,40,20])]
+         ),(180,
+           [(10,[10,30,40,20]),(70,[10,30,40,20])
+           ,(20,[10,30,40,20]),(80,[10,30,40,20])]
+         )
+         ]
+    
+    plt.sunburst(sa, radius=3,  rotatelabels=True,width=1,
+                 colors=["gold","skyblue","orange","blue"],
+                 coloropt=0.6, explode=0.1,centerlabel="hello")
+    
+    ax.autoscale()
+
+@image_comparison(baseline_images=['basic_sunburst'], extensions=['png'])
+def test_basic_sunburst():
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    
+    sa = [(180,
+           [(40,[10,10,40,20]),(40,[10,30,40,20])
+           ,(40,[10,30,40,20]),(60,[10,30,40,20])]
+         ),(180,
+           [(10,[10,30,40,20]),(70,[10,30,40,20])
+           ,(20,[10,30,40,20]),(80,[10,30,40,20])]
+         )
+         ]
+    
+    plt.sunburst(sa, radius=3,  rotatelabels=True,width=1,
+                 colors=["gold","skyblue","orange","blue"],
+                 coloropt=0.6, explode=0.1,centerlabel="hello")
+    
+    ax.autoscale()
+    
+    
+@image_comparison(baseline_images=['partial_sunburst'], extensions=['png'])
+def test_partial_sunburst():
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    
+    sa = [(180,
+           [(40,[10,10,40,20]),(40,[10,30,40,20]),(60,[10,30,40,20])]),
+          (180,[(70,[10,30,40,20]),(20,[10,30,40,20])])]
+    
+    plt.sunburst(sa, radius=3,  rotatelabels=True,width=1,
+                 colors=["gold","skyblue","orange","blue"],
+                 coloropt=0.6, explode=0.1,centerlabel="hello")
+    
+    ax.autoscale()
+
 
 
 @image_comparison(baseline_images=['doughnut_rotate_labels'],

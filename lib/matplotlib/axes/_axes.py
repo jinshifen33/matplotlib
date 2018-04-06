@@ -2900,21 +2900,16 @@ class Axes(_AxesBase):
             if the parameter *autopct* is not *None*.
             
         """
-        if len(x) == 0:
-            return 
-
         children = []
-        data = []
+        data = x
         
-        if isinstance(x[0], tuple):
-            data = []
-            children = []
-            for (size, child) in x:
-                data.append(size)
-                children.append(child)
-        else:
-            data = x
-
+        if len(x) > 0:
+            if isinstance(x[0], tuple):
+                temp = []
+                for (size, child) in x:
+                    temp.append(size)
+                    children.append(child)
+                data = temp
 
         result = self._draw_wedge(data, explode=explode, width=width, labels=labels, colors=colors,
                                         autopct=autopct, pctdistance=pctdistance,
@@ -3118,11 +3113,12 @@ class Axes(_AxesBase):
                               verticalalignment='center',
                               **textprops)
         
-        if radius:
-            width = 0.5 * radius
-        else:
-            width = 0.5
-        
+        if not width:
+            if radius:
+                width = 0.5 * radius
+            else:
+                width = 0.5
+
         result =  self._sunburst_drawing(x, explode=explode, width=width, labels=labels, colors=colors,
                                         autopct=autopct, pctdistance=pctdistance, coloropt=coloropt,
                                         shadow=shadow, labeldistance=labeldistance, endangle=endangle,
@@ -3264,11 +3260,13 @@ class Axes(_AxesBase):
                               verticalalignment='center',
                               **textprops)
         
-        if radius:
-            width = 0.5 * radius
-        else:
-            width = 0.5
+        if not width:
+            if radius:
+                width = 0.5 * radius
+            else:
+                width = 0.5
 
+        # normalized wedge sizes
         x = np.array(x, np.float32)
         sx = x.sum()
         if sx < 360:

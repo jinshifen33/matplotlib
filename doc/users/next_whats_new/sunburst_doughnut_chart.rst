@@ -2,20 +2,21 @@ Supporting for drawing Sunburst and Donut charts
 -----------------------------------------------------
 
 Donut chart drawing
+
 .. code-block:: python
     import matplotlib.pyplot as plt
-    import matplotlib.pyplot as plt
-    
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
 
-    data = [30,40,50,60]
+    labels = ["Python", "C++", "Ruby", "Java"]
+    sizes = [10,30,40,20]
+    colors = ["gold", "yellowgreen", "lightcoral", "lightskyblue"]
 
-    plt.doughnut(data, centerlabel="hello")
-    ax.autoscale()
+
+    plt.doughnut(sizes, colors=colors, labels=labels, width=0.3,centerlabel="Hello World")
+    plt.axis('equal')
     plt.show()
 
 Sunburst chart drawing
+
 .. code-block:: python
     import matplotlib.pyplot as plt
     import matplotlib.pyplot as plt

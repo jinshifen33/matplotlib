@@ -7,6 +7,7 @@ import matplotlib.cbook as cbook
 import matplotlib.artist as martist
 from .backend_tools import DataCursorIterator
 
+
 class Container(tuple):
     """
     Base class for containers.
@@ -136,44 +137,44 @@ class BarContainer(Container):
     def create_data_cursor_iterator(self, xdata, ydata):
         """
         Returns a new DataCursorIterator for the current BarContainer.
-		"""
-        return BarContainerIterator(xdata, ydata)
-
-class BarContainerIterator(DataCursorIterator):
-    """
-    DataCursorIterator for BarContainer.
-    """
-
-    def __init__(self, xdata, ydata):
-        DataCursorIterator.__init__(self, xdata, ydata)
-
-    def get_next(self):
         """
-        Gets next bar for ToolDataCursor.
+        return self.BarContainerIterator(xdata, ydata)
 
-        Returns
-        -------
-        A tuple (xs, ys) where xs is an array that contains the x
-        co-ordinate to place the new annotation and ys is an array that
-        contains the y to place the new annotation.
+    class BarContainerIterator(DataCursorIterator):
         """
-        if (self.ind + 1 < len(self.xdata)):
-            self.set_ind(self.ind + 1)
-        return (self.xdata[self.ind], self.ydata[self.ind])
+        DataCursorIterator for BarContainer.
+        """
 
-    def get_prev(self):
-        """
-        Gets previous bar for ToolDataCursor.
+        def __init__(self, xdata, ydata):
+            DataCursorIterator.__init__(self, xdata, ydata)
 
-        Returns
-        -------
-        A tuple (xs, ys) where xs is an array that contains the x
-        co-ordinate to place the new annotation and ys is an array that
-        contains the y to place the new annotation.
-        """
-        if (self.ind - 1 >= 0):
-            self.set_ind(self.ind - 1)
-        return (self.xdata[self.ind], self.ydata[self.ind])
+        def get_next(self):
+            """
+            Gets next bar for ToolDataCursor.
+
+            Returns
+            -------
+            A tuple (xs, ys) where xs is an array that contains the x
+            co-ordinate to place the new annotation and ys is an array that
+            contains the y to place the new annotation.
+            """
+            if (self.ind + 1 < len(self.xdata)):
+                self.set_ind(self.ind + 1)
+            return (self.xdata[self.ind], self.ydata[self.ind])
+
+        def get_prev(self):
+            """
+            Gets previous bar for ToolDataCursor.
+
+            Returns
+            -------
+            A tuple (xs, ys) where xs is an array that contains the x
+            co-ordinate to place the new annotation and ys is an array that
+            contains the y to place the new annotation.
+            """
+            if (self.ind - 1 >= 0):
+                self.set_ind(self.ind - 1)
+            return (self.xdata[self.ind], self.ydata[self.ind])
 
 
 class ErrorbarContainer(Container):

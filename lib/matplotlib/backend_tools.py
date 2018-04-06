@@ -25,7 +25,10 @@ import numpy as np
 class Cursors(object):
     """Simple namespace for cursor reference"""
     HAND, POINTER, SELECT_REGION, MOVE, WAIT = list(range(5))
+
+
 cursors = Cursors()
+
 
 # Views positions tool
 _views_positions = 'viewpos'
@@ -778,8 +781,10 @@ class ToolDataCursor(ToolToggleBase):
         self.last_press = time.time() - self.press_thresh
 
     def enable(self, event=None):
-        self.on_press_id = self.figure.canvas.mpl_connect('key_press_event', self.onpress)
-        self.on_pick_id = self.figure.canvas.mpl_connect('pick_event', self.onpick)
+        self.on_press_id = self.figure.canvas.mpl_connect('key_press_event',
+                                                          self.onpress)
+        self.on_pick_id = self.figure.canvas.mpl_connect('pick_event',
+                                                         self.onpick)
 
     def disable(self, event=None):
         self.remove_annotations()
@@ -802,7 +807,7 @@ class ToolDataCursor(ToolToggleBase):
         Given a pick event, this function tries to get the xdata and ydata
         for the artist that is being picked. If the artist is not supported,
         the function emits a warning.
-		
+
         Parameters
         ----------
         event: (event) The pick event
@@ -826,7 +831,8 @@ class ToolDataCursor(ToolToggleBase):
                 ydata = []
                 container = event.artist.axes.containers[i]
                 for j in range(len(container)):
-                    xdata.append(container[j].get_x() + container[j].get_width() / 2)
+                    xdata.append(container[j].get_x() +
+                                 container[j].get_width() / 2)
                     ydata.append(container[j].get_height())
                     if container[j] is event.artist:
                         self.artist = container
@@ -837,7 +843,8 @@ class ToolDataCursor(ToolToggleBase):
             ydata = np.array(ydata)
             return xdata, ydata, initial_index
         except AttributeError:
-            warnings.warn('The selected artist is not supported by ToolDataCursor: %s' % event.artist)
+            warnings.warn('The selected Artist is not supported by ' +
+                          'ToolDataCursor: ' + event.artist)
 
     def remove_annotations(self):
         """
@@ -858,10 +865,10 @@ class ToolDataCursor(ToolToggleBase):
         """
         self.remove_annotations()
         for axes in self.figure.get_axes():
-            self.annotations.append(axes.annotate("%.5f, %.5f" % (xs, ys), xy=(xs, ys),
-                                                  xytext=(0, -17), textcoords='offset points',
-                                                  va="bottom", ha="center", xycoords="data",
-                                                  bbox=dict(boxstyle="round", fc="w")))
+            self.annotations.append(axes.annotate(
+                "%.5f, %.5f" % (xs, ys), xy=(xs, ys), xytext=(0, -17),
+                textcoords='offset points', va="bottom", ha="center",
+                xycoords="data", bbox=dict(boxstyle="round", fc="w")))
         self.canvas.draw_idle()
 
     def onpress(self, event):
@@ -885,6 +892,7 @@ class ToolDataCursor(ToolToggleBase):
         self.process_selected(x, y)
         self.last_press = time.time()
 
+
 class DataCursorIterator:
     """
     Iterator for ToolDataCursor.
@@ -904,7 +912,6 @@ class DataCursorIterator:
         self.ind = ind
 
     def get_next(self):
-		
         pass
 
     def get_prev(self):

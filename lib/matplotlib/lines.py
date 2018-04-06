@@ -147,17 +147,17 @@ def _mark_every_path(markevery, tpath, affine, ax_transform):
     if isinstance(markevery, tuple):
         if len(markevery) != 2:
             raise ValueError('`markevery` is a tuple but its '
-                'len is not 2; '
-                'markevery=%s' % (markevery,))
+                             'len is not 2; '
+                             'markevery=%s' % (markevery,))
         start, step = markevery
         # if step is an int, old behavior
         if isinstance(step, int):
-            #tuple of 2 int is for backwards compatibility,
+            # tuple of 2 int is for backwards compatibility,
             if not(isinstance(start, int)):
                 raise ValueError('`markevery` is a tuple with '
-                    'len 2 and second element is an int, but '
-                    'the first element is not an int; '
-                    'markevery=%s' % (markevery,))
+                                 'len 2 and second element is an int, but '
+                                 'the first element is not an int; '
+                                 'markevery=%s' % (markevery,))
             # just return, we are done here
 
             return Path(verts[slice(start, None, step)],
@@ -203,19 +203,19 @@ def _mark_every_path(markevery, tpath, affine, ax_transform):
                     _slice_or_none(codes, markevery))
 
     elif iterable(markevery):
-        #fancy indexing
+        # fancy indexing
         try:
             return Path(verts[markevery],
-                    _slice_or_none(codes, markevery))
+                        _slice_or_none(codes, markevery))
 
         except (ValueError, IndexError):
             raise ValueError('`markevery` is iterable but '
-                'not a valid form of numpy fancy indexing; '
-                'markevery=%s' % (markevery,))
+                             'not a valid form of numpy fancy indexing; '
+                             'markevery=%s' % (markevery,))
     else:
         raise ValueError('Value of `markevery` is not '
-            'recognized; '
-            'markevery=%s' % (markevery,))
+                         'recognized; '
+                         'markevery=%s' % (markevery,))
 
 
 class Line2D(Artist):
@@ -315,7 +315,7 @@ class Line2D(Artist):
         """
         Artist.__init__(self)
 
-        #convert sequences to numpy arrays
+        # convert sequences to numpy arrays
         if not iterable(xdata):
             raise RuntimeError('xdata must be a sequence')
         if not iterable(ydata):
@@ -831,8 +831,8 @@ class Line2D(Artist):
             if nanmask.any():
                 self._x_filled = self._x.copy()
                 indices = np.arange(len(x))
-                self._x_filled[nanmask] = np.interp(indices[nanmask],
-                        indices[~nanmask], self._x[~nanmask])
+                self._x_filled[nanmask] = np.interp(
+                    indices[nanmask], indices[~nanmask], self._x[~nanmask])
             else:
                 self._x_filled = self._x
 

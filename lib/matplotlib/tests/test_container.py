@@ -4,6 +4,7 @@ import six
 import matplotlib.pyplot as plt
 import pytest
 
+
 def test_stem_remove():
     ax = plt.gca()
     st = ax.stem([1, 2], [1, 2])

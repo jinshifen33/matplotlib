@@ -13,23 +13,28 @@ import pytest
 
 DELAY = 0.5
 
+
 def get_tool(fig):
     return fig.canvas.manager.toolmanager.tools['data-cursor']
+
 
 def add_line(ax, xs, ys):
     line, = ax.plot(xs, ys, '-', picker=5)
     ax.figure.canvas.draw()
     return line
 
+
 def add_scatter(ax, xs, ys):
     scatter, = ax.plot(xs, ys, 'bs', picker=5)
     ax.figure.canvas.draw()
     return scatter
 
+
 def add_bars(ax, xs, ys):
     bars = ax.bar(xs, ys, align='center', picker=5)
     ax.figure.canvas.draw()
     return bars
+
 
 def set_up():
     # need to use a backend that has toolmanager
@@ -43,7 +48,8 @@ def set_up():
     return (fig, ax)
 
 
-def do_event(tool, ax, etype, artist, index, button=1, xdata=0, ydata=0, key=None, step=1, delay=DELAY):
+def do_event(tool, ax, etype, artist, index, button=1, xdata=0, ydata=0,
+             key=None, step=1, delay=DELAY):
     """
     *tool*
         the tool instance handling the event
@@ -107,8 +113,9 @@ def do_event(tool, ax, etype, artist, index, button=1, xdata=0, ydata=0, key=Non
     func = getattr(tool, etype)
     func(event)
 
+
 def test_line():
-    fig, ax=set_up()
+    fig, ax = set_up()
     tool = get_tool(fig)
     line = add_line(ax, [1, 2, 3], [1, 2, 3])
     tool.enable()
@@ -119,24 +126,27 @@ def test_line():
     do_event(tool, ax, 'onpress', line, 1, xdata=2, ydata=2, key='d')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1.05,1.05))
+    assert_allclose((float(annotation[0].strip()),
+                     float(annotation[1].strip())), (1.05, 1.05))
 
     do_event(tool, ax, 'onpress', line, 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
+    assert_allclose((float(annotation[0].strip()),
+                     float(annotation[1].strip())), (1, 1))
 
     do_event(tool, ax, 'onpress', line, 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
+    assert_allclose((float(annotation[0].strip()),
+                     float(annotation[1].strip())), (1, 1))
 
     tool.remove_annotations()
     assert len(tool.annotations) == 0
 
 
 def test_scatter():
-    fig, ax=set_up()
+    fig, ax = set_up()
     tool = get_tool(fig)
     scatter = add_scatter(ax, [1, 2, 3], [1, 2, 3])
     tool.enable()
@@ -146,23 +156,27 @@ def test_scatter():
     do_event(tool, ax, 'onpress', scatter, 1, xdata=2, ydata=2, key='d')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (2,2))
+    assert_allclose((float(annotation[0].strip()),
+                     float(annotation[1].strip())), (2, 2))
 
     do_event(tool, ax, 'onpress', scatter, 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
+    assert_allclose((float(annotation[0].strip()),
+                     float(annotation[1].strip())), (1, 1))
 
     do_event(tool, ax, 'onpress', scatter, 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (3,3))
+    assert_allclose((float(annotation[0].strip()),
+                     float(annotation[1].strip())), (3, 3))
 
     tool.remove_annotations()
     assert len(tool.annotations) == 0
 
+
 def test_bar():
-    fig, ax=set_up()
+    fig, ax = set_up()
     tool = get_tool(fig)
     bars = add_bars(ax, [1, 2, 3], [1, 2, 3])
     tool.enable()
@@ -172,18 +186,20 @@ def test_bar():
     do_event(tool, ax, 'onpress', bars[1], 1, xdata=2, ydata=2, key='d')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (2,2))
+    assert_allclose((float(annotation[0].strip()),
+                     float(annotation[1].strip())), (2, 2))
 
     do_event(tool, ax, 'onpress', bars[0], 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
+    assert_allclose((float(annotation[0].strip()),
+                     float(annotation[1].strip())), (1, 1))
 
     do_event(tool, ax, 'onpress', bars[0], 0, xdata=1, ydata=1, key='a')
     assert len(tool.annotations) > 0
     annotation = tool.annotations[0].get_text().split(',')
-    assert_allclose ((float(annotation[0].strip()), float(annotation[1].strip())), (1,1))
+    assert_allclose((float(annotation[0].strip()),
+                     float(annotation[1].strip())), (1, 1))
 
     tool.remove_annotations()
     assert len(tool.annotations) == 0
-

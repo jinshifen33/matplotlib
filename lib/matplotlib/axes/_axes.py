@@ -2575,9 +2575,9 @@ class Axes(_AxesBase):
 
         return stem_container
 
-    @_preprocess_data(replace_names=["children", "explode", "labels", "colors"],
+    @_preprocess_data(replace_names=["x", "explode", "labels", "colors"],
                           label_namer=None)
-    def _extend_on_wedge(self, x, explode=None, labels=None, colors=None,
+    def _draw_wedge(self, x, explode=None, labels=None, colors=None,
                 autopct=None, pctdistance=0.6, shadow=False, labeldistance=1.1,
                 startangle=None, radius=None, counterclock=True,
                 wedgeprops=None, textprops=None, center=(0, 0),
@@ -2677,13 +2677,19 @@ class Axes(_AxesBase):
         The pie chart will probably look best if the figure and axes are
         square, or the Axes aspect is equal.
         """
+        # Starting theta1 is the start fraction of the circle
+        if startangle is None:
+            startangle = 0            
+
+        if endangle is None:
+            endangle = 360
 
         x = np.array(x, np.float32)
-     
         sx = x.sum()
+        
         if sx > 1:
-            x /= sx
-     
+            x /= sx    
+        
         if labels is None:
             labels = [''] * len(x)
     
@@ -2712,15 +2718,7 @@ class Axes(_AxesBase):
         if radius is None:
             radius = 1
 
-        # Starting theta1 is the start fraction of the circle
-        if startangle is None:
-            theta1 = 0
-        else:
-            theta1 = startangle / 360.0
-
-        if endangle:
-            x *=  (endangle - startangle)/360
-            
+        theta1 = startangle / 360.0
      
         # set default values in wedge_prop
         if wedgeprops is None:
@@ -2815,6 +2813,7 @@ class Axes(_AxesBase):
         else:
             return slices, texts, autotexts
 
+
     def _sunburst_drawing(self, x, width=None, explode=None, labels=None, colors=None,
                 centerlabel=None, autopct=None, pctdistance=0.6,
                 shadow=False, labeldistance=1.1, coloropt=None, endangle=None,
@@ -2822,17 +2821,12 @@ class Axes(_AxesBase):
                 wedgeprops=None, textprops=None, center=(0, 0),
                 frame=False, rotatelabels=False):
 
-
-        try:
-            alpha = float(coloropt)
-            flag = True
-        except Exception:
-            flag = False
+        if len(x) == 0:
+            return 
 
         children = []
         data = []
         
-
         if isinstance(x[0], tuple):
             data = []
             children = []
@@ -2843,7 +2837,7 @@ class Axes(_AxesBase):
             data = x
 
 
-        result = self._extend_on_wedge(data, explode=explode, width=width, labels=labels, colors=colors,
+        result = self._draw_wedge(data, explode=explode, width=width, labels=labels, colors=colors,
                                         autopct=autopct, pctdistance=pctdistance,
                                         shadow=shadow, labeldistance=labeldistance,
                                         startangle=startangle, endangle=endangle, radius=radius, counterclock=counterclock,
@@ -2855,6 +2849,11 @@ class Axes(_AxesBase):
         else:
             slices, parent_labels, autotexts = result
         
+        try:
+            alpha = float(coloropt)
+            flag = True
+        except Exception:
+            flag = False
         
         slices_set  = []
         labels_set = []
@@ -2897,7 +2896,8 @@ class Axes(_AxesBase):
         else:
             return slices_set, labels_set, auto_text_set
 
-
+    @_preprocess_data(replace_names=["x", "explode", "labels", "colors"],
+                      label_namer=None)
     def sunburst(self, x, width=None, explode=None, labels=None, colors=None,
                 centerlabel=None, autopct=None, pctdistance=0.6,
                 shadow=False, labeldistance=1.1, coloropt=None,
@@ -3009,8 +3009,6 @@ class Axes(_AxesBase):
         The sunburst chart will probably look best if the figure and axes are
         square, or the Axes aspect is equal.
         """
-
-
         if centerlabel is None:
             centerlabel = ""
         center_x, center_y = center
@@ -3031,7 +3029,7 @@ class Axes(_AxesBase):
         
         self._sunburst_drawing(x, explode=explode, width=width, labels=labels, colors=colors,
                                         autopct=autopct, pctdistance=pctdistance, coloropt=coloropt,
-                                        shadow=shadow, labeldistance=labeldistance,
+                                        shadow=shadow, labeldistance=labeldistance, endangle=endangle,
                                         startangle=startangle, radius=radius, counterclock=counterclock,
                                         wedgeprops=wedgeprops, textprops=textprops, center=center,
                                         frame=frame, rotatelabels=rotatelabels)         
@@ -3149,7 +3147,7 @@ class Axes(_AxesBase):
         The doughnut chart will probably look best if the figure and axes are
         square, or the Axes aspect is equal.
         """
-
+        
         if centerlabel is None:
             centerlabel = ""
         center_x, center_y = center
@@ -3168,7 +3166,7 @@ class Axes(_AxesBase):
         else:
             width = 0.5
 
-        result = self._extend_on_wedge(x,explode=explode, width=width, labels=labels, colors=colors,
+        result = self._draw_wedge(x,explode=explode, width=width, labels=labels, colors=colors,
                                         autopct=autopct, pctdistance=pctdistance,
                                         shadow=shadow, labeldistance=labeldistance,
                                         startangle=startangle, radius=radius, counterclock=counterclock,
@@ -3277,7 +3275,8 @@ class Axes(_AxesBase):
         The pie chart will probably look best if the figure and axes are
         square, or the Axes aspect is equal.
         """
-        return self._extend_on_wedge(x,explode=explode, labels=labels, colors=colors,
+
+        return self._draw_wedge(x,explode=explode, labels=labels, colors=colors,
                                         autopct=autopct, pctdistance=pctdistance,
                                         shadow=shadow, labeldistance=labeldistance,
                                         startangle=startangle, radius=radius, counterclock=counterclock,

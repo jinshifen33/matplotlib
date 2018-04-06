@@ -155,6 +155,7 @@ def boilerplate_gen():
         'stem',
         'step',
         'streamplot',
+        'sunburst',
         'tricontour',
         'tricontourf',
         'tripcolor',

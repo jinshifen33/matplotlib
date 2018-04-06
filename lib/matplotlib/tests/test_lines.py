@@ -15,6 +15,10 @@ import matplotlib.pyplot as plt
 from matplotlib.testing.decorators import image_comparison
 
 
+def float_compare(x1, x2, decimal=5):
+    np.testing.assert_almost_equal(x1, x2, decimal)
+
+
 # Runtimes on a loaded system are inherently flaky. Not so much that a rerun
 # won't help, hopefully.
 @pytest.mark.flaky(reruns=3)
@@ -231,3 +235,27 @@ def test_marker_iterator():
     # test the set method
     iter.set_ind(1)
     assert iter.get_ind() == 1
+
+
+def test_line_iterator():
+    fig, ax = plt.subplots()
+    x = np.arange(5)
+    y = np.array([0, 20, 10, 1, 2])
+    line, = ax.plot(x, y, label='l1', picker=5)
+    iter = line.create_data_cursor_iterator(
+        np.array(x), np.array(y))
+
+    assert iter.get_ind() == 0
+
+    # Test get_next() method
+    for i in range(1, 20):
+        float_compare(iter.get_next(), (0.05 * i, i))
+        assert iter.get_ind() == 0
+    float_compare(iter.get_next(), (1, 20))
+    assert iter.interp_ind == 0
+    assert iter.get_ind() == 1
+
+    # Test get_prev() method. Should wrap around.
+    float_compare(iter.get_prev(), (0.95, 19))
+    assert iter.interp_ind == 19
+    assert iter.get_ind() == 0

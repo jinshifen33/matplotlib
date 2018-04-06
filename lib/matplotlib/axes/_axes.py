@@ -2886,15 +2886,18 @@ class Axes(_AxesBase):
             
         Returns
         -------
-        patches : list
-            A sequence of :class:`matplotlib.patches.Wedge` instances
-            
-        texts : list
-            A list of the label :class:`matplotlib.text.Text` instances.
-            autotexts : list
-            A list of :class:`~matplotlib.text.Text` instances for the numeric
-            labels. This will only be returned if the parameter *autopct* is
-            not *None*.
+        patches : list of list
+            A list of list of :class:`matplotlib.patches.Wedge` instances
+            In the format given in *x*
+
+        texts : list of list
+            A list of list of the label :class:`matplotlib.text.Text` instances.
+            In the format given in *x*
+
+        autotexts : list of list
+            A list of list of :class:`~matplotlib.text.Text` instances for the numeric
+            labels, in the format given in *x*. This will only be returned
+            if the parameter *autopct* is not *None*.
             
         """
         if len(x) == 0:
@@ -3073,16 +3076,22 @@ class Axes(_AxesBase):
 
         Returns
         -------
-        patches : list
-            A sequence of :class:`matplotlib.patches.Wedge` instances
+        patches : list of list
+            A list of list of :class:`matplotlib.patches.Wedge` instances
+            In the format given in *x*
 
-        texts : list
-            A list of the label :class:`matplotlib.text.Text` instances.
+        texts : list of list
+            A list of list of the label :class:`matplotlib.text.Text` instances.
+            In the format given in *x*
 
-        autotexts : list
-            A list of :class:`~matplotlib.text.Text` instances for the numeric
-            labels. This will only be returned if the parameter *autopct* is
-            not *None*.
+        autotexts : list of list
+            A list of list of :class:`~matplotlib.text.Text` instances for the numeric
+            labels, in the format given in *x*. This will only be returned
+            if the parameter *autopct* is not *None*.
+
+        centertexts: text
+            A :class:`~matplotlib.text.Text` instances for the central
+            label.
 
         Notes
         -----
@@ -3114,16 +3123,19 @@ class Axes(_AxesBase):
         else:
             width = 0.5
         
-        self._sunburst_drawing(x, explode=explode, width=width, labels=labels, colors=colors,
+        result =  self._sunburst_drawing(x, explode=explode, width=width, labels=labels, colors=colors,
                                         autopct=autopct, pctdistance=pctdistance, coloropt=coloropt,
                                         shadow=shadow, labeldistance=labeldistance, endangle=endangle,
                                         startangle=startangle, radius=radius, counterclock=counterclock,
                                         wedgeprops=wedgeprops, textprops=textprops, center=center,
                                         frame=frame, rotatelabels=rotatelabels)         
         
-
-
-        return slices ,lables, autotext, centertext
+        if autopct:
+            slices ,lables, autotext = result
+            return  slices ,lables, autotext, centertext
+        else:
+            slices ,lables = result
+            return slices ,lables, centertext
 
     @_preprocess_data(replace_names=["x", "explode", "labels", "colors"],
                       label_namer=None)

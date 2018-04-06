@@ -7,7 +7,7 @@ Donut chart drawing
     import matplotlib.pyplot as plt
     
     fig = plt.figure()
-    ax = fig.add_subplot()
+    ax = fig.add_subplot(111)
 
     data = [30,40,50,60]
 
@@ -21,18 +21,21 @@ Sunburst chart drawing
     import matplotlib.pyplot as plt
     
     fig = plt.figure()
-    ax = fig.add_subplot()
+    ax = fig.add_subplot(111)
 
-    data = [(100,
-        [(10,[10,30,40,20]),(20,[10,30,40,20])
-        ,(10,[10,30,40,20]),(30,[10,30,40,20])]
-      ),(100,
+    data = [(180,
+        [(50,[10,30,40,20]),(70,[10,30,40,20])
+        ,(10,[10,30,40,20]),(50,[10,30,40,20])]
+      ),(90,
+        [(20,[10,30,40,20]),(70,[10,30,40,20])
+        ,(50,[10,30,40,20]),(80,[10,30,40,20])]
+      ),(90,
         [(20,[10,30,40,20]),(70,[10,30,40,20])
         ,(50,[10,30,40,20]),(80,[10,30,40,20])]
       )
       ]
 
-    plt.sunburst(data, coloropt=0.8, explode=0.1,centerlabel="hello")
+    plt.sunburst(data, coloropt=0.8, explode=0.2,centerlabel="hello")
     ax.autoscale()
     plt.show()
 
